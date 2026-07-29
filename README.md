@@ -1,6 +1,6 @@
-# Football Atlas
+# FootIndex
 
-Football Atlas is a modern football player search engine designed to make discovering, comparing and analysing football players simple, fast and beautiful.
+FootIndex is a modern football player search engine designed to make discovering, comparing and analysing football players simple, fast and beautiful.
 
 The platform provides comprehensive player profiles, career statistics, comparisons, rankings and AI-powered insights through a high-performance, SEO-first architecture.
 
