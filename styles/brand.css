@@ -1,0 +1,37 @@
+/**
+ * Brand tokens for Haaland vs Mbappé.
+ * Kept separate from shadcn base tokens so UI chrome and brand accent stay clear.
+ *
+ * Decision: Manchester City sky blue (#6CABDD) is a dedicated --brand token, not
+ * shadcn --accent, so muted UI accents never collide with CTAs and live highlights.
+ */
+
+:root {
+  --brand: #6cabdd;
+  --brand-foreground: #ffffff;
+  --brand-muted: color-mix(in srgb, var(--brand) 18%, transparent);
+
+  --glass: rgb(255 255 255 / 0.06);
+  --glass-strong: rgb(255 255 255 / 0.1);
+  --glass-border: rgb(255 255 255 / 0.12);
+  --glass-highlight: rgb(255 255 255 / 0.2);
+
+  --surface-black: #000000;
+  --surface-elevated: #0a0a0a;
+
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --motion-slow: 450ms;
+  --ease-out-premium: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-muted: var(--brand-muted);
+  --color-glass: var(--glass);
+  --color-glass-strong: var(--glass-strong);
+  --color-glass-border: var(--glass-border);
+  --color-surface-black: var(--surface-black);
+  --color-surface-elevated: var(--surface-elevated);
+}

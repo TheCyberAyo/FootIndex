@@ -1,39 +1,71 @@
-# FootIndex
+# Haaland vs Mbappé
 
-FootIndex is a modern football player search engine designed to make discovering, comparing and analysing football players simple, fast and beautiful.
+Premium dark-theme football statistics site comparing **Erling Haaland** and **Kylian Mbappé** on career achievements for club and country.
 
-The platform provides comprehensive player profiles, career statistics, comparisons, rankings and AI-powered insights through a high-performance, SEO-first architecture.
+Career totals are **curated baselines** (`lib/data/career-baselines.ts`) until Pro multi-season sync; Free-plan API sync updates season form and fixtures only.
 
-Unlike traditional football statistics websites, Football Atlas is designed as a search engine where users can instantly search any football player and access structured career information, historical statistics and intelligent comparisons.
+## Stack
 
-## Features
+- Next.js 15 (App Router) + TypeScript
+- Tailwind CSS v4 + shadcn/ui
+- Framer Motion + Recharts
+- TanStack React Query
+- Supabase + PostgreSQL
+- API-Football
 
-- 🔍 Instant player search
-- ⚽ Career statistics
-- 📊 Season statistics
-- 🏆 Trophy cabinet
-- 🤝 Player comparisons
-- 📈 Interactive charts
-- 🌍 Team and competition pages
-- 📋 Rankings and leaderboards
-- 🚀 SEO-first architecture
-- 📱 Fully responsive design
-- ⚡ High-performance Next.js application
-- 🤖 AI-generated player summaries (planned)
+## Current status
 
-## Technology Stack
+| Phase | Status |
+| --- | --- |
+| 1 Foundation | Complete |
+| 2 Database | Complete |
+| 3 API Integration | Complete |
+| 4 Player Pages | Complete |
+| 5 Comparison engine | Complete |
+| 6 Charts | Complete |
+| 7 Voting + auth + theme | Complete |
+| 8 Engagement | Complete |
+| 9 SEO | Complete |
+| 10 Launch polish | Complete |
 
-- Next.js
-- TypeScript
-- Tailwind CSS
-- Supabase
-- PostgreSQL
-- Football Data API
-- Vercel
-- Framer Motion
-- React Query
-- Cursor AI
+## Getting started
 
-## Vision
+```bash
+cp .env.example .env.local
+npm install
+npm run dev
+```
 
-Our goal is to build the fastest and most comprehensive football player search engine on the web, allowing fans to search, compare and analyse every professional football player through a clean, modern and data-driven experience.
+Open [http://localhost:3000](http://localhost:3000).
+
+See [`docs/PHASE_3_SYNC.md`](./docs/PHASE_3_SYNC.md) to sync API-Football → Supabase.
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Dev server (Turbopack) |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
+
+## Verify
+
+- `GET /api/health` → `phase: 10`, `apiFootballConfigured`
+- `POST /api/sync?job=all` with `Authorization: Bearer $CRON_SECRET`
+- `GET /api/stats` · `GET /api/matches` · home appearances · `/compare` · `/stats`
+- Legal: `/privacy` · `/terms` · `/contact` · `/api-docs`
+
+## Project rules & decisions
+
+- [PROJECT_RULES.md](./PROJECT_RULES.md) — coding standards
+- [DECISIONS.md](./DECISIONS.md) — API, auth, sync, news, launch
+
+## Architecture notes
+
+- **SEO:** Next.js Metadata API (`lib/seo.ts`)
+- **API docs page:** `/api-docs` (Route Handlers live under `/api/*`)
+- **Brand accent:** `--brand` (`#6CABDD`, Manchester City sky blue)
+- **Data access:** UI → `services/*` → Supabase / local seed
+- **External football data:** API-Football → `/api/sync` only (never from the browser)
