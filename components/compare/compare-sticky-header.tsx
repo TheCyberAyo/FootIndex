@@ -1,14 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { playerPath } from "@/lib/players/paths";
 import { cn } from "@/lib/utils";
 import type { PlayerProfile } from "@/types/domain";
 
 interface CompareStickyHeaderProps {
-  haaland: PlayerProfile;
-  mbappe: PlayerProfile;
-  haalandWins: number;
-  mbappeWins: number;
+  playerOne: PlayerProfile;
+  playerTwo: PlayerProfile;
+  playerOneWins: number;
+  playerTwoWins: number;
 }
 
 function PlayerChip({
@@ -24,7 +25,7 @@ function PlayerChip({
 
   return (
     <Link
-      href={`/${player.slug}`}
+      href={playerPath(player.slug)}
       className={cn(
         "flex min-w-0 items-center gap-3",
         align === "right" && "flex-row-reverse text-right",
@@ -57,19 +58,19 @@ function PlayerChip({
  * Sticky dual header — stays visible while scrolling metric rows.
  */
 export function CompareStickyHeader({
-  haaland,
-  mbappe,
-  haalandWins,
-  mbappeWins,
+  playerOne,
+  playerTwo,
+  playerOneWins,
+  playerTwoWins,
 }: CompareStickyHeaderProps) {
   return (
     <div className="sticky top-16 z-40 border-b border-glass-border bg-black/80 backdrop-blur-xl">
       <div className="mx-auto grid max-w-5xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3 sm:px-6">
-        <PlayerChip profile={haaland} wins={haalandWins} align="left" />
+        <PlayerChip profile={playerOne} wins={playerOneWins} align="left" />
         <p className="font-display text-sm font-extrabold tracking-[0.2em] text-brand sm:text-base">
           VS
         </p>
-        <PlayerChip profile={mbappe} wins={mbappeWins} align="right" />
+        <PlayerChip profile={playerTwo} wins={playerTwoWins} align="right" />
       </div>
     </div>
   );

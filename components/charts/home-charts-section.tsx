@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { HaalandMbappeLegend } from "@/components/charts/chart-legend";
+import { DualPlayerLegend } from "@/components/charts/chart-legend";
 import { ChartShell } from "@/components/charts/chart-shell";
 import { CompareBarChart } from "@/components/charts/compare-bar-chart";
 import { CompareRadarChart } from "@/components/charts/compare-radar-chart";
@@ -11,7 +11,7 @@ import {
   buildBarSeries,
   buildRadarSeries,
 } from "@/lib/charts";
-import { buildComparison } from "@/lib/compare";
+import { buildComparison, defaultComparePath } from "@/lib/compare";
 import type { PlayerProfile } from "@/types/domain";
 
 interface HomeChartsSectionProps {
@@ -29,8 +29,8 @@ export function HomeChartsSection({
   const comparison = buildComparison(haaland, mbappe);
   const radar = buildRadarSeries(comparison.metrics);
   const bars = buildBarSeries(comparison.metrics);
-  const haalandName = haaland.player.short_name;
-  const mbappeName = mbappe.player.short_name;
+  const playerOneName = haaland.player.short_name;
+  const playerTwoName = mbappe.player.short_name;
 
   return (
     <Section
@@ -44,32 +44,32 @@ export function HomeChartsSection({
           title="Ability radar"
           height={CHART_HEIGHT.md}
           legend={
-            <HaalandMbappeLegend
-              haalandName={haalandName}
-              mbappeName={mbappeName}
+            <DualPlayerLegend
+              playerOneName={playerOneName}
+              playerTwoName={playerTwoName}
             />
           }
         >
           <CompareRadarChart
             data={radar}
-            haalandName={haalandName}
-            mbappeName={mbappeName}
+            playerOneName={playerOneName}
+            playerTwoName={playerTwoName}
           />
         </ChartShell>
         <ChartShell
           title="Head-to-head bars"
           height={CHART_HEIGHT.md}
           legend={
-            <HaalandMbappeLegend
-              haalandName={haalandName}
-              mbappeName={mbappeName}
+            <DualPlayerLegend
+              playerOneName={playerOneName}
+              playerTwoName={playerTwoName}
             />
           }
         >
           <CompareBarChart
             data={bars}
-            haalandName={haalandName}
-            mbappeName={mbappeName}
+            playerOneName={playerOneName}
+            playerTwoName={playerTwoName}
           />
         </ChartShell>
       </div>
@@ -78,7 +78,9 @@ export function HomeChartsSection({
           asChild
           className="bg-brand text-brand-foreground hover:bg-brand/90"
         >
-          <Link href="/compare#charts">All charts on Compare</Link>
+          <Link href={`${defaultComparePath()}#charts`}>
+            All charts on Compare
+          </Link>
         </Button>
       </div>
     </Section>

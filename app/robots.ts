@@ -1,20 +1,28 @@
 import type { MetadataRoute } from "next";
 
 import { SITE_URL } from "@/lib/constants";
+import { SITEMAP_PATHS } from "@/lib/seo/sitemaps";
 
-/**
- * Allow public pages; block auth/API surfaces from indexing.
- */
 export default function robots(): MetadataRoute.Robots {
+  const base = SITE_URL.replace(/\/$/, "");
+
   return {
     rules: [
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/login", "/auth/"],
+        disallow: ["/api/", "/login", "/auth/", "/compare?"],
       },
     ],
-    sitemap: `${SITE_URL.replace(/\/$/, "")}/sitemap.xml`,
-    host: SITE_URL.replace(/\/$/, ""),
+    sitemap: [
+      `${base}${SITEMAP_PATHS.main}`,
+      `${base}${SITEMAP_PATHS.players}`,
+      `${base}${SITEMAP_PATHS.compare}`,
+      `${base}${SITEMAP_PATHS.news}`,
+      `${base}${SITEMAP_PATHS.rankings}`,
+      `${base}${SITEMAP_PATHS.teams}`,
+      `${base}${SITEMAP_PATHS.competitions}`,
+    ],
+    host: base,
   };
 }

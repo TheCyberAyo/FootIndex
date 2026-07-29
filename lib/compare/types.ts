@@ -1,4 +1,4 @@
-export type MetricWinner = "haaland" | "mbappe" | "tie";
+export type MetricWinner = "playerOne" | "playerTwo" | "tie";
 
 export type MetricFormat = "integer" | "decimal";
 
@@ -9,15 +9,15 @@ export interface CompareMetricDefinition {
 }
 
 export interface CompareMetric extends CompareMetricDefinition {
-  haalandValue: number;
-  mbappeValue: number;
+  playerOneValue: number;
+  playerTwoValue: number;
   winner: MetricWinner;
   delta: number;
 }
 
 export interface CompareScoreboard {
-  haalandWins: number;
-  mbappeWins: number;
+  playerOneWins: number;
+  playerTwoWins: number;
   ties: number;
 }
 

@@ -10,7 +10,18 @@ export {
   listSeasonStatsByPlayerId,
 } from "@/services/stats/stats.service";
 
-export { listTeams, getTeamById } from "@/services/teams/teams.service";
+export { listTeams, getTeamById, getTeamBySlug, listPlayersByTeamId } from "@/services/teams/teams.service";
+
+export {
+  getRanking,
+  getTopScorersPreview,
+} from "@/services/rankings/rankings.service";
+
+export {
+  listCompetitions,
+  getCompetitionBySlug,
+  listCompetitionLeaderboard,
+} from "@/services/competitions/competitions.service";
 
 export {
   listRecentMatches,
@@ -42,7 +53,16 @@ export {
 
 export { getVoteBundle, castVote } from "@/services/votes/vote-actions";
 
-export { runSyncJob, assertCronAuthorized } from "@/services/sync/sync.service";
+export { runSyncJob, assertCronAuthorized, syncPlayerBySlug } from "@/services/sync/sync.service";
+export { listSyncablePlayers } from "@/services/sync/syncable-players";
 export type { SyncJob, SyncJobResult } from "@/services/sync/sync.service";
+export type { SyncablePlayer } from "@/services/sync/syncable-players";
+
+export {
+  searchPlayers,
+  listTrendingPlayers,
+  MIN_QUERY_LENGTH,
+  SEARCH_DEFAULT_LIMIT,
+} from "@/services/search/search.service";
 
 export { ServiceError } from "@/services/errors";

@@ -3,15 +3,15 @@ import type { CareerStats, PlayerProfile, SeasonStats } from "@/types/domain";
 
 export interface RadarPoint {
   metric: string;
-  haaland: number;
-  mbappe: number;
+  playerOne: number;
+  playerTwo: number;
   fullMark: number;
 }
 
 export interface BarPoint {
   metric: string;
-  haaland: number;
-  mbappe: number;
+  playerOne: number;
+  playerTwo: number;
 }
 
 export interface PieSlice {
@@ -28,8 +28,8 @@ export interface SeasonProgressPoint {
 
 export interface DualSeasonProgressPoint {
   season: string;
-  haaland: number;
-  mbappe: number;
+  playerOne: number;
+  playerTwo: number;
 }
 
 const RADAR_KEYS = [
@@ -71,13 +71,13 @@ export function buildRadarSeries(metrics: CompareMetric[]): RadarPoint[] {
     )
     .map((metric) => {
       const normalized = normalizePair(
-        metric.haalandValue,
-        metric.mbappeValue,
+        metric.playerOneValue,
+        metric.playerTwoValue,
       );
       return {
         metric: metric.label,
-        haaland: normalized.a,
-        mbappe: normalized.b,
+        playerOne: normalized.a,
+        playerTwo: normalized.b,
         fullMark: 100,
       };
     });
@@ -88,8 +88,8 @@ export function buildBarSeries(metrics: CompareMetric[]): BarPoint[] {
     .filter((metric) => (BAR_KEYS as readonly string[]).includes(metric.key))
     .map((metric) => ({
       metric: metric.label.replace("Champions League Goals", "UCL Goals"),
-      haaland: metric.haalandValue,
-      mbappe: metric.mbappeValue,
+      playerOne: metric.playerOneValue,
+      playerTwo: metric.playerTwoValue,
     }));
 }
 
@@ -132,29 +132,29 @@ export function buildSeasonProgression(
 }
 
 export function buildDualSeasonGoals(
-  haaland: PlayerProfile,
-  mbappe: PlayerProfile,
+  playerOne: PlayerProfile,
+  playerTwo: PlayerProfile,
 ): DualSeasonProgressPoint[] {
-  const haalandBySeason = new Map(
-    buildSeasonProgression(haaland.seasons).map((point) => [
+  const playerOneBySeason = new Map(
+    buildSeasonProgression(playerOne.seasons).map((point) => [
       point.season,
       point.goals,
     ]),
   );
-  const mbappeBySeason = new Map(
-    buildSeasonProgression(mbappe.seasons).map((point) => [
+  const playerTwoBySeason = new Map(
+    buildSeasonProgression(playerTwo.seasons).map((point) => [
       point.season,
       point.goals,
     ]),
   );
 
   const seasons = Array.from(
-    new Set([...haalandBySeason.keys(), ...mbappeBySeason.keys()]),
+    new Set([...playerOneBySeason.keys(), ...playerTwoBySeason.keys()]),
   ).sort((a, b) => a.localeCompare(b));
 
   return seasons.map((season) => ({
     season,
-    haaland: haalandBySeason.get(season) ?? 0,
-    mbappe: mbappeBySeason.get(season) ?? 0,
+    playerOne: playerOneBySeason.get(season) ?? 0,
+    playerTwo: playerTwoBySeason.get(season) ?? 0,
   }));
 }

@@ -3,6 +3,7 @@ import type {
   CareerStatRow,
   CommentEntityType,
   MatchRow,
+  PlayerPosition,
   PlayerRow,
   PlayerStatRow,
   SeasonStatRow,
@@ -46,9 +47,45 @@ export interface PlayerProfile {
   trophies: Trophy[];
 }
 
+/** Search autocomplete / results card (PROJECT_SPECIFICATION §56). */
+export interface PlayerSearchResult {
+  id: string;
+  slug: string;
+  name: string;
+  shortName: string;
+  age: number;
+  nationality: string;
+  position: PlayerPosition;
+  positionLabel: string;
+  imageUrl: string | null;
+  clubName: string | null;
+  clubLogoUrl: string | null;
+  competition: string | null;
+  href: string;
+}
+
 export interface ComparisonBundle {
   haaland: PlayerProfile;
   mbappe: PlayerProfile;
+}
+
+export interface RankingEntry {
+  rank: number;
+  player: Player;
+  value: number;
+  valueLabel: string;
+}
+
+export interface CompetitionSummary {
+  slug: string;
+  name: string;
+}
+
+export interface CompetitionPlayerRow {
+  player: Player;
+  appearances: number;
+  goals: number;
+  assists: number;
 }
 
 export interface VoteTally {

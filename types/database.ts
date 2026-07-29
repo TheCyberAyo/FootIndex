@@ -26,6 +26,7 @@ export type LikeEntityType = "comment" | "prediction" | "news";
 
 export type TeamRow = {
   id: string;
+  slug: string;
   name: string;
   short_name: string;
   country: string;
@@ -201,6 +202,7 @@ export interface Database {
         Row: TeamRow;
         Insert: {
           id?: string;
+          slug: string;
           name: string;
           short_name: string;
           country: string;
@@ -212,6 +214,7 @@ export interface Database {
         };
         Update: {
           id?: string;
+          slug?: string;
           name?: string;
           short_name?: string;
           country?: string;
@@ -686,7 +689,26 @@ export interface Database {
       };
     };
     Functions: {
-      [_ in never]: never;
+      search_players: {
+        Args: {
+          search_query: string;
+          result_limit?: number;
+        };
+        Returns: {
+          id: string;
+          slug: string;
+          name: string;
+          short_name: string;
+          date_of_birth: string;
+          nationality: string;
+          player_position: PlayerPosition;
+          image_url: string | null;
+          club_name: string | null;
+          club_logo_url: string | null;
+          competition: string | null;
+          search_rank: number | null;
+        }[];
+      };
     };
     Enums: {
       team_type: TeamType;

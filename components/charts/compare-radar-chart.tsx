@@ -15,14 +15,14 @@ import { CHART_COLORS, type RadarPoint } from "@/lib/charts";
 
 interface CompareRadarChartProps {
   data: RadarPoint[];
-  haalandName: string;
-  mbappeName: string;
+  playerOneName: string;
+  playerTwoName: string;
 }
 
 function RadarBody({
   data,
-  haalandName,
-  mbappeName,
+  playerOneName,
+  playerTwoName,
 }: CompareRadarChartProps) {
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -47,16 +47,16 @@ function RadarBody({
           }}
         />
         <Radar
-          name={haalandName}
-          dataKey="haaland"
+          name={playerOneName}
+          dataKey="playerOne"
           stroke={CHART_COLORS.haaland}
           fill={CHART_COLORS.haaland}
           fillOpacity={0.18}
           strokeWidth={2}
         />
         <Radar
-          name={mbappeName}
-          dataKey="mbappe"
+          name={playerTwoName}
+          dataKey="playerTwo"
           stroke={CHART_COLORS.mbappe}
           fill={CHART_COLORS.mbappe}
           fillOpacity={0.22}

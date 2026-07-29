@@ -31,13 +31,13 @@ export const PLAYERS = {
     slug: "haaland",
     name: "Erling Haaland",
     shortName: "Haaland",
-    path: "/haaland",
+    path: "/player/haaland",
   },
   mbappe: {
     slug: "mbappe",
     name: "Kylian Mbappé",
     shortName: "Mbappé",
-    path: "/mbappe",
+    path: "/player/mbappe",
   },
 } as const;
 
@@ -48,9 +48,12 @@ export interface NavItem {
 
 export const PRIMARY_NAV: NavItem[] = [
   { href: "/", label: "Home" },
-  { href: "/haaland", label: "Haaland" },
-  { href: "/mbappe", label: "Mbappé" },
-  { href: "/compare", label: "Compare" },
+  { href: "/search", label: "Search" },
+  { href: "/rankings", label: "Rankings" },
+  { href: "/player/haaland", label: "Haaland" },
+  { href: "/player/mbappe", label: "Mbappé" },
+  { href: "/compare/haaland/mbappe", label: "Compare" },
+  { href: "/competition", label: "Competitions" },
   { href: "/predict", label: "Predict" },
   { href: "/stats", label: "Stats" },
   { href: "/news", label: "News" },
@@ -58,8 +61,8 @@ export const PRIMARY_NAV: NavItem[] = [
 ];
 
 export const FOOTER_NAV: NavItem[] = [
-  { href: "/haaland", label: "Haaland" },
-  { href: "/mbappe", label: "Mbappé" },
+  { href: "/player/haaland", label: "Haaland" },
+  { href: "/player/mbappe", label: "Mbappé" },
   { href: "/about", label: "About" },
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },

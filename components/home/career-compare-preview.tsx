@@ -4,6 +4,7 @@ import { GlassCard } from "@/components/shared/glass-card";
 import { Button } from "@/components/ui/button";
 import {
   buildComparison,
+  defaultComparePath,
   formatCompareValue,
   type CompareMetric,
 } from "@/lib/compare";
@@ -26,18 +27,18 @@ const PREVIEW_KEYS = new Set([
 ]);
 
 function PreviewRow({ metric }: { metric: CompareMetric }) {
-  const haalandLeads = metric.winner === "haaland";
-  const mbappeLeads = metric.winner === "mbappe";
+  const playerOneLeads = metric.winner === "playerOne";
+  const playerTwoLeads = metric.winner === "playerTwo";
 
   return (
     <GlassCard className="grid grid-cols-3 items-center gap-2 px-4 py-3 sm:px-5">
       <p
         className={cn(
           "text-left font-semibold",
-          haalandLeads ? "text-brand" : "text-white",
+          playerOneLeads ? "text-brand" : "text-white",
         )}
       >
-        {formatCompareValue(metric.haalandValue, metric.format)}
+        {formatCompareValue(metric.playerOneValue, metric.format)}
       </p>
       <div className="text-center">
         <p className="text-[10px] tracking-[0.18em] text-white/40 uppercase sm:text-xs">
@@ -47,17 +48,17 @@ function PreviewRow({ metric }: { metric: CompareMetric }) {
       <p
         className={cn(
           "text-right font-semibold",
-          mbappeLeads ? "text-brand" : "text-white",
+          playerTwoLeads ? "text-brand" : "text-white",
         )}
       >
-        {formatCompareValue(metric.mbappeValue, metric.format)}
+        {formatCompareValue(metric.playerTwoValue, metric.format)}
       </p>
     </GlassCard>
   );
 }
 
 /**
- * Server Component home preview — shares Phase 5 compare engine with /compare.
+ * Server Component home preview — shares compare engine with /compare.
  */
 export function CareerComparePreview({
   haaland,
@@ -78,7 +79,7 @@ export function CareerComparePreview({
           asChild
           className="w-full bg-brand text-brand-foreground hover:bg-brand/90 sm:w-auto"
         >
-          <Link href="/compare">Open full comparison</Link>
+          <Link href={defaultComparePath()}>Open full comparison</Link>
         </Button>
       </div>
     </div>

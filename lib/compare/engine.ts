@@ -36,14 +36,14 @@ export const COMPARE_METRIC_DEFINITIONS: CompareMetricDefinition[] = [
 ];
 
 export function decideWinner(
-  haalandValue: number,
-  mbappeValue: number,
+  playerOneValue: number,
+  playerTwoValue: number,
 ): MetricWinner {
-  if (haalandValue > mbappeValue) {
-    return "haaland";
+  if (playerOneValue > playerTwoValue) {
+    return "playerOne";
   }
-  if (mbappeValue > haalandValue) {
-    return "mbappe";
+  if (playerTwoValue > playerOneValue) {
+    return "playerTwo";
   }
   return "tie";
 }
@@ -91,19 +91,19 @@ function readMetricValue(profile: PlayerProfile, key: string): number {
 }
 
 export function buildCompareMetrics(
-  haaland: PlayerProfile,
-  mbappe: PlayerProfile,
+  playerOne: PlayerProfile,
+  playerTwo: PlayerProfile,
 ): CompareMetric[] {
   return COMPARE_METRIC_DEFINITIONS.map((definition) => {
-    const haalandValue = readMetricValue(haaland, definition.key);
-    const mbappeValue = readMetricValue(mbappe, definition.key);
+    const playerOneValue = readMetricValue(playerOne, definition.key);
+    const playerTwoValue = readMetricValue(playerTwo, definition.key);
 
     return {
       ...definition,
-      haalandValue,
-      mbappeValue,
-      winner: decideWinner(haalandValue, mbappeValue),
-      delta: Math.abs(haalandValue - mbappeValue),
+      playerOneValue,
+      playerTwoValue,
+      winner: decideWinner(playerOneValue, playerTwoValue),
+      delta: Math.abs(playerOneValue - playerTwoValue),
     };
   });
 }
@@ -111,24 +111,24 @@ export function buildCompareMetrics(
 export function buildScoreboard(metrics: CompareMetric[]): CompareScoreboard {
   return metrics.reduce<CompareScoreboard>(
     (acc, metric) => {
-      if (metric.winner === "haaland") {
-        acc.haalandWins += 1;
-      } else if (metric.winner === "mbappe") {
-        acc.mbappeWins += 1;
+      if (metric.winner === "playerOne") {
+        acc.playerOneWins += 1;
+      } else if (metric.winner === "playerTwo") {
+        acc.playerTwoWins += 1;
       } else {
         acc.ties += 1;
       }
       return acc;
     },
-    { haalandWins: 0, mbappeWins: 0, ties: 0 },
+    { playerOneWins: 0, playerTwoWins: 0, ties: 0 },
   );
 }
 
 export function buildComparison(
-  haaland: PlayerProfile,
-  mbappe: PlayerProfile,
+  playerOne: PlayerProfile,
+  playerTwo: PlayerProfile,
 ): CompareResult {
-  const metrics = buildCompareMetrics(haaland, mbappe);
+  const metrics = buildCompareMetrics(playerOne, playerTwo);
   return {
     metrics,
     scoreboard: buildScoreboard(metrics),

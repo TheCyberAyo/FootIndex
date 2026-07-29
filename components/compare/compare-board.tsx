@@ -7,12 +7,14 @@ import { YearCompareLazy } from "@/components/compare/year-compare-lazy";
 import { Container } from "@/components/shared/container";
 import { Section } from "@/components/shared/section";
 import { VoteSection } from "@/components/votes/vote-section";
-import { buildComparison } from "@/lib/compare";
+import { buildComparison, isFeaturedRivalryCompare } from "@/lib/compare";
 import type { PlayerProfile } from "@/types/domain";
 
 interface CompareBoardProps {
-  haaland: PlayerProfile;
-  mbappe: PlayerProfile;
+  playerOne: PlayerProfile;
+  playerTwo: PlayerProfile;
+  comparePath: string;
+  entityId: string;
   initialSeason?: string | null;
   initialYear?: string | null;
 }
@@ -21,54 +23,67 @@ interface CompareBoardProps {
  * Full comparison experience — engine on the server, motion island for rows.
  */
 export function CompareBoard({
-  haaland,
-  mbappe,
+  playerOne,
+  playerTwo,
+  comparePath,
+  entityId,
   initialSeason = null,
   initialYear = null,
 }: CompareBoardProps) {
-  const comparison = buildComparison(haaland, mbappe);
+  const comparison = buildComparison(playerOne, playerTwo);
+  const featured = isFeaturedRivalryCompare(
+    playerOne.player.slug,
+    playerTwo.player.slug,
+  );
+  const playerOneName = playerOne.player.short_name;
+  const playerTwoName = playerTwo.player.short_name;
 
   return (
     <>
       <CompareStickyHeader
-        haaland={haaland}
-        mbappe={mbappe}
-        haalandWins={comparison.scoreboard.haalandWins}
-        mbappeWins={comparison.scoreboard.mbappeWins}
+        playerOne={playerOne}
+        playerTwo={playerTwo}
+        playerOneWins={comparison.scoreboard.playerOneWins}
+        playerTwoWins={comparison.scoreboard.playerTwoWins}
       />
 
       <Section
         eyebrow="Head to head"
-        title="Career comparison"
+        title={`${playerOneName} vs ${playerTwoName}`}
         description="Leaders glow City blue. Bars scale to the higher value in each row."
       >
         <div className="mb-8">
           <CompareScoreboardCard
             scoreboard={comparison.scoreboard}
-            haalandName={haaland.player.short_name}
-            mbappeName={mbappe.player.short_name}
+            playerOneName={playerOneName}
+            playerTwoName={playerTwoName}
           />
         </div>
         <CompareMetricsList metrics={comparison.metrics} />
       </Section>
 
-      <YearCompareLazy
-        initialSeason={initialSeason}
-        initialYear={initialYear}
-      />
+      {featured ? (
+        <YearCompareLazy
+          initialSeason={initialSeason}
+          initialYear={initialYear}
+        />
+      ) : null}
 
-      <CompareChartsSection haaland={haaland} mbappe={mbappe} />
-      <VoteSection nextPath="/compare#vote" />
+      <CompareChartsSection playerOne={playerOne} playerTwo={playerTwo} />
+
+      {featured ? <VoteSection nextPath={`${comparePath}#vote`} /> : null}
+
       <CommentsSection
         entityType="compare"
-        entityId="haaland-vs-mbappe"
-        nextPath="/compare#comments"
+        entityId={entityId}
+        nextPath={`${comparePath}#comments`}
         title="Head-to-head chat"
       />
 
       <Container className="pb-12">
         <p className="text-center text-xs text-white/35">
-          Haaland left · Mbappé right · Mobile stacks values under each metric
+          {playerOneName} left · {playerTwoName} right · Mobile stacks values
+          under each metric
         </p>
       </Container>
     </>

@@ -13,10 +13,13 @@ import type {
   Player,
   PlayerMatchStats,
   PlayerProfile,
+  PlayerSearchResult,
   SeasonStats,
   Team,
   Trophy,
 } from "@/types/domain";
+import { getPlayerAge, formatPosition } from "@/lib/players/format";
+import { playerPath } from "@/lib/players/paths";
 
 const NOW = `${CAREER_BASELINE_AS_OF}T00:00:00.000Z`;
 
@@ -28,6 +31,7 @@ const NOW = `${CAREER_BASELINE_AS_OF}T00:00:00.000Z`;
 export const localTeams: Team[] = [
   {
     id: SEED_TEAM_IDS.manchesterCity,
+    slug: "manchester-city",
     name: "Manchester City",
     short_name: "Man City",
     country: "England",
@@ -39,6 +43,7 @@ export const localTeams: Team[] = [
   },
   {
     id: SEED_TEAM_IDS.realMadrid,
+    slug: "real-madrid",
     name: "Real Madrid",
     short_name: "Real Madrid",
     country: "Spain",
@@ -50,6 +55,7 @@ export const localTeams: Team[] = [
   },
   {
     id: SEED_TEAM_IDS.norway,
+    slug: "norway",
     name: "Norway",
     short_name: "Norway",
     country: "Norway",
@@ -61,6 +67,7 @@ export const localTeams: Team[] = [
   },
   {
     id: SEED_TEAM_IDS.france,
+    slug: "france",
     name: "France",
     short_name: "France",
     country: "France",
@@ -72,6 +79,7 @@ export const localTeams: Team[] = [
   },
   {
     id: SEED_TEAM_IDS.dortmund,
+    slug: "borussia-dortmund",
     name: "Borussia Dortmund",
     short_name: "Dortmund",
     country: "Germany",
@@ -83,6 +91,7 @@ export const localTeams: Team[] = [
   },
   {
     id: SEED_TEAM_IDS.psg,
+    slug: "paris-saint-germain",
     name: "Paris Saint Germain",
     short_name: "PSG",
     country: "France",
@@ -93,7 +102,32 @@ export const localTeams: Team[] = [
     updated_at: NOW,
   },
   {
+    id: SEED_TEAM_IDS.monaco,
+    slug: "as-monaco",
+    name: "AS Monaco",
+    short_name: "Monaco",
+    country: "France",
+    team_type: "club",
+    logo_url: null,
+    api_football_id: 91,
+    created_at: NOW,
+    updated_at: NOW,
+  },
+  {
+    id: SEED_TEAM_IDS.molde,
+    slug: "molde-fk",
+    name: "Molde FK",
+    short_name: "Molde",
+    country: "Norway",
+    team_type: "club",
+    logo_url: null,
+    api_football_id: 348,
+    created_at: NOW,
+    updated_at: NOW,
+  },
+  {
     id: SEED_TEAM_IDS.salzburg,
+    slug: "red-bull-salzburg",
     name: "Red Bull Salzburg",
     short_name: "Salzburg",
     country: "Austria",
@@ -760,4 +794,59 @@ export function buildLocalLiveScoreCards(): LiveScoreCard[] {
     });
   }
   return cards;
+}
+
+function latestCompetitionForPlayer(playerId: string): string | null {
+  const seasons = localSeasonStats
+    .filter((row) => row.player_id === playerId)
+    .sort((a, b) => b.season.localeCompare(a.season));
+  return seasons[0]?.competition ?? null;
+}
+
+function mapLocalPlayerToSearchResult(player: Player): PlayerSearchResult {
+  return {
+    id: player.id,
+    slug: player.slug,
+    name: player.name,
+    shortName: player.short_name,
+    age: getPlayerAge(player.date_of_birth),
+    nationality: player.nationality,
+    position: player.position,
+    positionLabel: formatPosition(player.position),
+    imageUrl: player.image_url,
+    clubName: player.current_team?.name ?? null,
+    clubLogoUrl: player.current_team?.logo_url ?? null,
+    competition: latestCompetitionForPlayer(player.id),
+    href: playerPath(player.slug),
+  };
+}
+
+export function buildLocalPlayerSearchResults(): PlayerSearchResult[] {
+  return localPlayers.map(mapLocalPlayerToSearchResult);
+}
+
+export function searchLocalPlayers(
+  query: string,
+  limit: number,
+): PlayerSearchResult[] {
+  const normalized = query.trim().toLowerCase();
+  if (normalized.length < 2) {
+    return [];
+  }
+
+  return localPlayers
+    .filter((player) => {
+      const haystack = [
+        player.name,
+        player.short_name,
+        player.nationality,
+        player.slug,
+        player.current_team?.name ?? "",
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(normalized);
+    })
+    .slice(0, limit)
+    .map(mapLocalPlayerToSearchResult);
 }

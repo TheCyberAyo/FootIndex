@@ -35,13 +35,20 @@ const ENDPOINTS: ApiEndpoint[] = [
     path: "/api/sync?job=players|fixtures|all",
     auth: "Bearer CRON_SECRET",
     description:
-      "Server-only API-Football → Supabase sync (profiles/seasons or player-club fixtures).",
+      "Server-only API-Football → Supabase sync for every player with api_football_id (profiles/seasons or club fixtures).",
   },
   {
     method: "GET",
     path: "/api/players",
     auth: "None",
     description: "Haaland and Mbappé identity + career summary fields.",
+  },
+  {
+    method: "GET",
+    path: "/api/search?q=&limit=",
+    auth: "None",
+    description:
+      "Player search autocomplete — Supabase full-text search (min 2 chars, never Football API).",
   },
   {
     method: "GET",

@@ -2,26 +2,13 @@ import { notFound } from "next/navigation";
 
 import type { Metadata } from "next";
 
-import { PLAYERS } from "@/lib/constants";
+import { isValidPlayerSlugFormat, playerPath } from "@/lib/players/paths";
 import { createPageMetadata } from "@/lib/seo";
 import { getPlayerProfileBySlug } from "@/services";
 import type { PlayerProfile } from "@/types/domain";
 
-export const PLAYER_SLUGS = ["haaland", "mbappe"] as const;
-export type PlayerSlug = (typeof PLAYER_SLUGS)[number];
-
-export function isPlayerSlug(value: string): value is PlayerSlug {
-  return PLAYER_SLUGS.includes(value as PlayerSlug);
-}
-
-export function playerPathForSlug(slug: PlayerSlug): string {
-  return PLAYERS[slug].path;
-}
-
-export async function loadPlayerProfile(
-  slug: string,
-): Promise<PlayerProfile> {
-  if (!isPlayerSlug(slug)) {
+export async function loadPlayerProfile(slug: string): Promise<PlayerProfile> {
+  if (!isValidPlayerSlugFormat(slug)) {
     notFound();
   }
 
@@ -33,46 +20,56 @@ export async function loadPlayerProfile(
   return profile;
 }
 
-export async function createPlayerMetadata(
-  slug: string,
-): Promise<Metadata> {
-  if (!isPlayerSlug(slug)) {
+export async function createPlayerMetadata(slug: string): Promise<Metadata> {
+  const path = playerPath(slug);
+
+  if (!isValidPlayerSlugFormat(slug)) {
     return createPageMetadata({
       title: "Player not found",
       description: "This player profile does not exist.",
-      path: `/players/${slug}`,
+      path,
       noIndex: true,
     });
   }
 
   const profile = await getPlayerProfileBySlug(slug);
-  const path = playerPathForSlug(slug);
-  const name = profile?.player.name ?? PLAYERS[slug].name;
-  const club = profile?.player.current_team?.name;
-  const goals = profile?.career?.goals;
+  if (!profile) {
+    return createPageMetadata({
+      title: "Player not found",
+      description: "This player profile does not exist.",
+      path,
+      noIndex: true,
+    });
+  }
 
-  const rival =
-    slug === "haaland" ? "Kylian Mbappé" : "Erling Haaland";
+  const { player, career } = profile;
+  const club = player.current_team?.name;
+  const goals = career?.goals;
+  const assists = career?.assists;
+
   const description = [
-    `${name} career stats`,
-    club ? `${club}` : null,
+    `${player.name} career stats`,
+    club ?? null,
     goals != null ? `${goals} career goals` : null,
-    `club and country record, trophies, and awards — compare with ${rival} on Haaland vs Mbappé.`,
+    assists != null ? `${assists} assists` : null,
+    "club and country record, trophies, and awards.",
   ]
     .filter(Boolean)
     .join(" — ");
 
   return createPageMetadata({
-    title: `${name} Career Stats`,
+    title: `${player.name} Career Stats`,
     description,
     path,
-    imageUrl: profile?.player.image_url,
+    imageUrl: player.image_url,
     ogType: "profile",
     keywords: [
-      name,
-      `${PLAYERS[slug].shortName} career goals`,
-      `${PLAYERS[slug].shortName} trophies`,
-      "Haaland vs Mbappé",
-    ],
+      player.name,
+      `${player.short_name} career goals`,
+      `${player.short_name} stats`,
+      `${player.short_name} trophies`,
+      player.nationality,
+      club ?? "",
+    ].filter(Boolean),
   });
 }

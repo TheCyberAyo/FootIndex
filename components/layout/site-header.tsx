@@ -6,8 +6,10 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { AuthMenu } from "@/components/auth/auth-menu";
+import { PlayerSearch } from "@/components/search/player-search";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { defaultComparePath } from "@/lib/compare";
 import { PRIMARY_NAV, SITE_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +57,8 @@ export function SiteHeader() {
           })}
         </nav>
 
+        <PlayerSearch variant="header" className="mx-2 hidden lg:block" />
+
         <div className="hidden items-center gap-2 md:flex">
           <ThemeToggle />
           <AuthMenu />
@@ -62,7 +66,7 @@ export function SiteHeader() {
             asChild
             className="bg-brand text-brand-foreground hover:bg-brand/90"
           >
-            <Link href="/compare#vote">Vote</Link>
+            <Link href={`${defaultComparePath()}#vote`}>Vote</Link>
           </Button>
         </div>
 
@@ -119,7 +123,7 @@ export function SiteHeader() {
                 asChild
                 className="bg-brand text-brand-foreground hover:bg-brand/90"
               >
-                <Link href="/compare#vote" onClick={() => setOpen(false)}>
+                <Link href={`${defaultComparePath()}#vote`} onClick={() => setOpen(false)}>
                   Vote
                 </Link>
               </Button>

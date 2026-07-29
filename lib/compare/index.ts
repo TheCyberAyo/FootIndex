@@ -17,6 +17,16 @@ export {
 } from "@/lib/compare/engine";
 
 export {
+  comparePath,
+  compareCanonicalPath,
+  compareEntityId,
+  isValidCompareSlugPair,
+  isFeaturedRivalryCompare,
+  defaultComparePath,
+  DEFAULT_COMPARE_SLUGS,
+} from "@/lib/compare/paths";
+
+export {
   filterSeasonsByQuery,
   resolveSeasonKey,
   getSeasonRow,

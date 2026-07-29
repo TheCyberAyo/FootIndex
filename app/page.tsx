@@ -4,6 +4,7 @@ import { HomeChartsSection } from "@/components/charts/home-charts-section";
 import { CareerComparePreview } from "@/components/home/career-compare-preview";
 import { HomeHero } from "@/components/home/home-hero";
 import { LiveScoresSectionClient } from "@/components/home/live-scores-section-client";
+import { RankingTable } from "@/components/rankings/ranking-table";
 import { PredictionsSection } from "@/components/predictions/predictions-section";
 import { GlassCard } from "@/components/shared/glass-card";
 import { Section } from "@/components/shared/section";
@@ -19,7 +20,9 @@ import {
 } from "@/lib/seo/json-ld";
 import {
   getComparisonProfiles,
+  getTopScorersPreview,
   listLiveScoreCards,
+  listTrendingPlayers,
 } from "@/services";
 import { RECENT_MATCHES_PER_PLAYER } from "@/lib/api-football/constants";
 
@@ -60,10 +63,13 @@ const FEATURE_CARDS = [
 ] as const;
 
 export default async function HomePage() {
-  const [{ haaland, mbappe }, liveCards] = await Promise.all([
-    getComparisonProfiles(),
-    listLiveScoreCards(),
-  ]);
+  const [{ haaland, mbappe }, liveCards, trending, topScorers] =
+    await Promise.all([
+      getComparisonProfiles(),
+      listLiveScoreCards(),
+      listTrendingPlayers(),
+      getTopScorersPreview(5),
+    ]);
 
   const initialHasLive = liveCards.some(
     (card) => card.match.status === "live",
@@ -77,7 +83,7 @@ export default async function HomePage() {
           createFaqJsonLd(HOME_FAQ),
         ]}
       />
-      <HomeHero />
+      <HomeHero trending={trending} />
 
       <Section
         eyebrow="Recent appearances"
@@ -99,6 +105,23 @@ export default async function HomePage() {
       </Section>
 
       <HomeChartsSection haaland={haaland} mbappe={mbappe} />
+
+      <Section
+        eyebrow="Rankings"
+        title="Top scorers"
+        description="Career goals leaders from our player database."
+      >
+        <RankingTable entries={topScorers} metricLabel="Goals" />
+        <div className="mt-6">
+          <Button
+            asChild
+            variant="outline"
+            className="border-white/20 bg-transparent text-white hover:bg-white/10"
+          >
+            <Link href="/rankings">All rankings</Link>
+          </Button>
+        </div>
+      </Section>
 
       <VoteSection nextPath="/#vote" />
       <PredictionsSection nextPath="/#predict" compact />
@@ -124,14 +147,14 @@ export default async function HomePage() {
             asChild
             className="bg-brand text-brand-foreground hover:bg-brand/90"
           >
-            <Link href="/haaland">Haaland</Link>
+            <Link href="/player/haaland">Haaland</Link>
           </Button>
           <Button
             asChild
             variant="outline"
             className="border-white/20 bg-transparent text-white hover:bg-white/10"
           >
-            <Link href="/mbappe">Mbappé</Link>
+            <Link href="/player/mbappe">Mbappé</Link>
           </Button>
           <Button asChild variant="ghost" className="text-white hover:bg-white/10">
             <Link href="/stats">Latest Stats</Link>

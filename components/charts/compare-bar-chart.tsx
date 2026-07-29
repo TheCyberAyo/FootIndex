@@ -15,11 +15,15 @@ import { CHART_COLORS, type BarPoint } from "@/lib/charts";
 
 interface CompareBarChartProps {
   data: BarPoint[];
-  haalandName: string;
-  mbappeName: string;
+  playerOneName: string;
+  playerTwoName: string;
 }
 
-function BarBody({ data, haalandName, mbappeName }: CompareBarChartProps) {
+function BarBody({
+  data,
+  playerOneName,
+  playerTwoName,
+}: CompareBarChartProps) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart
@@ -58,15 +62,15 @@ function BarBody({ data, haalandName, mbappeName }: CompareBarChartProps) {
           }}
         />
         <Bar
-          name={haalandName}
-          dataKey="haaland"
+          name={playerOneName}
+          dataKey="playerOne"
           fill={CHART_COLORS.haaland}
           radius={[4, 4, 0, 0]}
           maxBarSize={28}
         />
         <Bar
-          name={mbappeName}
-          dataKey="mbappe"
+          name={playerTwoName}
+          dataKey="playerTwo"
           fill={CHART_COLORS.mbappe}
           radius={[4, 4, 0, 0]}
           maxBarSize={28}

@@ -1,3 +1,4 @@
+-- Consolidated schema (init + RLS + policies + career baseline guard)
 -- Phase 2: core schema for Haaland vs Mbappé
 -- Decision: UUID primary keys for distributed-friendly IDs; api_football_id
 -- nullable unique for Phase 3 upserts without coupling identity to the vendor.
@@ -389,3 +390,288 @@ select
   ) as vote_percentage
 from public.votes
 group by choice;
+
+-- Phase 2: Row Level Security
+-- Decision: public read for all stats tables; authenticated write for
+-- engagement tables; service role bypasses RLS for Phase 3 sync jobs.
+
+alter table public.teams enable row level security;
+alter table public.players enable row level security;
+alter table public.matches enable row level security;
+alter table public.player_stats enable row level security;
+alter table public.season_stats enable row level security;
+alter table public.career_stats enable row level security;
+alter table public.awards enable row level security;
+alter table public.trophies enable row level security;
+alter table public.users enable row level security;
+alter table public.votes enable row level security;
+alter table public.predictions enable row level security;
+alter table public.comments enable row level security;
+alter table public.likes enable row level security;
+
+-- ---------------------------------------------------------------------------
+-- Public read: reference + stats data
+-- ---------------------------------------------------------------------------
+
+create policy "teams_public_read"
+on public.teams for select
+to anon, authenticated
+using (true);
+
+create policy "players_public_read"
+on public.players for select
+to anon, authenticated
+using (true);
+
+create policy "matches_public_read"
+on public.matches for select
+to anon, authenticated
+using (true);
+
+create policy "player_stats_public_read"
+on public.player_stats for select
+to anon, authenticated
+using (true);
+
+create policy "season_stats_public_read"
+on public.season_stats for select
+to anon, authenticated
+using (true);
+
+create policy "career_stats_public_read"
+on public.career_stats for select
+to anon, authenticated
+using (true);
+
+create policy "awards_public_read"
+on public.awards for select
+to anon, authenticated
+using (true);
+
+create policy "trophies_public_read"
+on public.trophies for select
+to anon, authenticated
+using (true);
+
+-- ---------------------------------------------------------------------------
+-- Users
+-- ---------------------------------------------------------------------------
+
+create policy "users_public_read"
+on public.users for select
+to anon, authenticated
+using (true);
+
+create policy "users_update_own"
+on public.users for update
+to authenticated
+using (auth.uid() = id)
+with check (auth.uid() = id);
+
+-- Inserts happen via security definer trigger on auth.users
+
+-- ---------------------------------------------------------------------------
+-- Votes: everyone can read tallies; one row per user upserted by owner
+-- ---------------------------------------------------------------------------
+
+create policy "votes_public_read"
+on public.votes for select
+to anon, authenticated
+using (true);
+
+create policy "votes_insert_own"
+on public.votes for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+create policy "votes_update_own"
+on public.votes for update
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+create policy "votes_delete_own"
+on public.votes for delete
+to authenticated
+using (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
+-- Predictions
+-- ---------------------------------------------------------------------------
+
+create policy "predictions_public_read"
+on public.predictions for select
+to anon, authenticated
+using (true);
+
+create policy "predictions_insert_own"
+on public.predictions for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+create policy "predictions_update_own"
+on public.predictions for update
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+create policy "predictions_delete_own"
+on public.predictions for delete
+to authenticated
+using (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
+-- Comments
+-- ---------------------------------------------------------------------------
+
+create policy "comments_public_read"
+on public.comments for select
+to anon, authenticated
+using (true);
+
+create policy "comments_insert_own"
+on public.comments for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+create policy "comments_update_own"
+on public.comments for update
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+create policy "comments_delete_own"
+on public.comments for delete
+to authenticated
+using (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
+-- Likes
+-- ---------------------------------------------------------------------------
+
+create policy "likes_public_read"
+on public.likes for select
+to anon, authenticated
+using (true);
+
+create policy "likes_insert_own"
+on public.likes for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+create policy "likes_delete_own"
+on public.likes for delete
+to authenticated
+using (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
+-- Grants for anon/authenticated (RLS still applies)
+-- ---------------------------------------------------------------------------
+
+grant usage on schema public to anon, authenticated;
+
+grant select on all tables in schema public to anon, authenticated;
+grant select on public.vote_leaderboard to anon, authenticated;
+
+grant insert, update, delete on public.votes to authenticated;
+grant insert, update, delete on public.predictions to authenticated;
+grant insert, update, delete on public.comments to authenticated;
+grant insert, delete on public.likes to authenticated;
+grant update on public.users to authenticated;
+
+-- Phase 7: allow authenticated users to self-heal missing profile rows
+-- (trigger on auth.users remains primary path).
+
+create policy "users_insert_own"
+on public.users for insert
+to authenticated
+with check (auth.uid() = id);
+
+grant insert on public.users to authenticated;
+
+-- Curated career baselines (Free plan): refresh totals + fix incorrect Mbappé Madrid trophies.
+-- Mirrors lib/data/career-baselines.ts as of 2026-07-25.
+
+insert into public.teams (id, name, short_name, country, team_type, api_football_id)
+values (
+  '11111111-1111-4111-8111-111111111109',
+  'Red Bull Salzburg',
+  'Salzburg',
+  'Austria',
+  'club',
+  571
+)
+on conflict (id) do update set
+  name = excluded.name,
+  short_name = excluded.short_name,
+  country = excluded.country,
+  team_type = excluded.team_type,
+  api_football_id = excluded.api_football_id;
+
+update public.career_stats
+set
+  appearances = 435,
+  goals = 359,
+  assists = 68,
+  minutes = 33500,
+  club_goals = 297,
+  international_goals = 62,
+  champions_league_goals = 57,
+  trophies_count = 12,
+  awards_count = 14
+where player_id = '22222222-2222-4222-8222-222222222201';
+
+update public.career_stats
+set
+  appearances = 577,
+  goals = 435,
+  assists = 152,
+  minutes = 44800,
+  club_goals = 369,
+  international_goals = 66,
+  champions_league_goals = 70,
+  trophies_count = 20,
+  awards_count = 18
+where player_id = '22222222-2222-4222-8222-222222222202';
+
+-- Mbappé joined Real Madrid in summer 2024 — remove pre-arrival Madrid silverware.
+delete from public.trophies
+where player_id = '22222222-2222-4222-8222-222222222202'
+  and team_id = '11111111-1111-4111-8111-111111111102'
+  and name in ('UEFA Champions League', 'La Liga')
+  and season = '2023-2024';
+
+insert into public.trophies (player_id, team_id, name, season, year)
+select *
+from (
+  values
+    (
+      '22222222-2222-4222-8222-222222222201'::uuid,
+      '11111111-1111-4111-8111-111111111109'::uuid,
+      'Austrian Bundesliga',
+      '2018-2019',
+      2019
+    ),
+    (
+      '22222222-2222-4222-8222-222222222202'::uuid,
+      '11111111-1111-4111-8111-111111111102'::uuid,
+      'UEFA Super Cup',
+      '2024',
+      2024
+    ),
+    (
+      '22222222-2222-4222-8222-222222222202'::uuid,
+      '11111111-1111-4111-8111-111111111102'::uuid,
+      'FIFA Intercontinental Cup',
+      '2024',
+      2024
+    )
+) as v(player_id, team_id, name, season, year)
+where not exists (
+  select 1
+  from public.trophies t
+  where t.player_id = v.player_id
+    and t.name = v.name
+    and t.season is not distinct from v.season
+    and t.year = v.year
+);

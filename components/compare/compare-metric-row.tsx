@@ -7,24 +7,26 @@ interface CompareMetricRowProps {
 }
 
 /**
- * One metric row: Haaland | label | Mbappé with brand blue leader highlight.
+ * One metric row: player one | label | player two with brand blue leader highlight.
  */
 export function CompareMetricRow({ metric }: CompareMetricRowProps) {
-  const haalandLeads = metric.winner === "haaland";
-  const mbappeLeads = metric.winner === "mbappe";
-  const haalandDisplay = formatCompareValue(
-    metric.haalandValue,
+  const playerOneLeads = metric.winner === "playerOne";
+  const playerTwoLeads = metric.winner === "playerTwo";
+  const playerOneDisplay = formatCompareValue(
+    metric.playerOneValue,
     metric.format,
   );
-  const mbappeDisplay = formatCompareValue(metric.mbappeValue, metric.format);
+  const playerTwoDisplay = formatCompareValue(
+    metric.playerTwoValue,
+    metric.format,
+  );
 
-  const max = Math.max(metric.haalandValue, metric.mbappeValue, 1);
-  const haalandWidth = Math.round((metric.haalandValue / max) * 100);
-  const mbappeWidth = Math.round((metric.mbappeValue / max) * 100);
+  const max = Math.max(metric.playerOneValue, metric.playerTwoValue, 1);
+  const playerOneWidth = Math.round((metric.playerOneValue / max) * 100);
+  const playerTwoWidth = Math.round((metric.playerTwoValue / max) * 100);
 
   return (
     <article className="rounded-2xl border border-glass-border bg-glass px-4 py-4 backdrop-blur-xl sm:px-5">
-      {/* Mobile: label first, then values */}
       <div className="mb-3 text-center sm:hidden">
         <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
           {metric.label}
@@ -43,18 +45,18 @@ export function CompareMetricRow({ metric }: CompareMetricRowProps) {
           <p
             className={cn(
               "font-display text-2xl font-extrabold sm:text-3xl",
-              haalandLeads ? "text-brand" : "text-white",
+              playerOneLeads ? "text-brand" : "text-white",
             )}
           >
-            {haalandDisplay}
+            {playerOneDisplay}
           </p>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
             <div
               className={cn(
                 "h-full rounded-full transition-all",
-                haalandLeads ? "bg-brand" : "bg-white/40",
+                playerOneLeads ? "bg-brand" : "bg-white/40",
               )}
-              style={{ width: `${haalandWidth}%` }}
+              style={{ width: `${playerOneWidth}%` }}
             />
           </div>
         </div>
@@ -76,18 +78,18 @@ export function CompareMetricRow({ metric }: CompareMetricRowProps) {
           <p
             className={cn(
               "font-display text-2xl font-extrabold sm:text-3xl",
-              mbappeLeads ? "text-brand" : "text-white",
+              playerTwoLeads ? "text-brand" : "text-white",
             )}
           >
-            {mbappeDisplay}
+            {playerTwoDisplay}
           </p>
           <div className="mt-2 ml-auto h-1.5 w-full overflow-hidden rounded-full bg-white/10">
             <div
               className={cn(
                 "ml-auto h-full rounded-full transition-all",
-                mbappeLeads ? "bg-brand" : "bg-white/40",
+                playerTwoLeads ? "bg-brand" : "bg-white/40",
               )}
-              style={{ width: `${mbappeWidth}%` }}
+              style={{ width: `${playerTwoWidth}%` }}
             />
           </div>
         </div>

@@ -3,14 +3,14 @@ import { formatPosition, getPlayerAge } from "@/lib/players/format";
 import type { PlayerProfile } from "@/types/domain";
 
 /**
- * Athlete JSON-LD for player pages (SEO-ready in Phase 4).
+ * Athlete JSON-LD for player pages (PROJECT_SPECIFICATION §86).
  */
 export function createAthleteJsonLd(profile: PlayerProfile, path: string) {
   const { player, career } = profile;
 
   return {
     "@context": "https://schema.org",
-    "@type": "Person",
+    "@type": ["Person", "Athlete"],
     "@id": `${SITE_URL}${path}#athlete`,
     name: player.name,
     alternateName: player.short_name,

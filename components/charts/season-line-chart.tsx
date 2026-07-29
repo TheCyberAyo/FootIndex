@@ -23,8 +23,8 @@ interface SeasonLineChartProps {
 
 interface DualSeasonLineChartProps {
   data: DualSeasonProgressPoint[];
-  haalandName: string;
-  mbappeName: string;
+  playerOneName: string;
+  playerTwoName: string;
 }
 
 function SeasonLineBody({ data }: SeasonLineChartProps) {
@@ -81,8 +81,8 @@ function SeasonLineBody({ data }: SeasonLineChartProps) {
 
 function DualSeasonLineBody({
   data,
-  haalandName,
-  mbappeName,
+  playerOneName,
+  playerTwoName,
 }: DualSeasonLineChartProps) {
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -114,8 +114,8 @@ function DualSeasonLineBody({
         />
         <Line
           type="monotone"
-          dataKey="haaland"
-          name={haalandName}
+          dataKey="playerOne"
+          name={playerOneName}
           stroke={CHART_COLORS.haaland}
           strokeWidth={2.5}
           dot={{ r: 3, fill: CHART_COLORS.haaland }}
@@ -123,8 +123,8 @@ function DualSeasonLineBody({
         />
         <Line
           type="monotone"
-          dataKey="mbappe"
-          name={mbappeName}
+          dataKey="playerTwo"
+          name={playerTwoName}
           stroke={CHART_COLORS.mbappe}
           strokeWidth={2.5}
           dot={{ r: 3, fill: CHART_COLORS.mbappe }}

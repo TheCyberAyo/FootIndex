@@ -1,6 +1,6 @@
 import {
   ChartLegend,
-  HaalandMbappeLegend,
+  DualPlayerLegend,
 } from "@/components/charts/chart-legend";
 import { ChartShell } from "@/components/charts/chart-shell";
 import { CompareBarChart } from "@/components/charts/compare-bar-chart";
@@ -20,25 +20,25 @@ import { buildComparison } from "@/lib/compare";
 import type { PlayerProfile } from "@/types/domain";
 
 interface CompareChartsSectionProps {
-  haaland: PlayerProfile;
-  mbappe: PlayerProfile;
+  playerOne: PlayerProfile;
+  playerTwo: PlayerProfile;
 }
 
 /**
  * Server section: series built on the server, Recharts islands on the client.
  */
 export function CompareChartsSection({
-  haaland,
-  mbappe,
+  playerOne,
+  playerTwo,
 }: CompareChartsSectionProps) {
-  const comparison = buildComparison(haaland, mbappe);
+  const comparison = buildComparison(playerOne, playerTwo);
   const radar = buildRadarSeries(comparison.metrics);
   const bars = buildBarSeries(comparison.metrics);
-  const dualLine = buildDualSeasonGoals(haaland, mbappe);
-  const haalandPie = buildGoalsPie(haaland.career);
-  const mbappePie = buildGoalsPie(mbappe.career);
-  const haalandName = haaland.player.short_name;
-  const mbappeName = mbappe.player.short_name;
+  const dualLine = buildDualSeasonGoals(playerOne, playerTwo);
+  const playerOnePie = buildGoalsPie(playerOne.career);
+  const playerTwoPie = buildGoalsPie(playerTwo.career);
+  const playerOneName = playerOne.player.short_name;
+  const playerTwoName = playerTwo.player.short_name;
 
   return (
     <Section
@@ -53,16 +53,16 @@ export function CompareChartsSection({
           description="Normalized head-to-head profile"
           height={CHART_HEIGHT.lg}
           legend={
-            <HaalandMbappeLegend
-              haalandName={haalandName}
-              mbappeName={mbappeName}
+            <DualPlayerLegend
+              playerOneName={playerOneName}
+              playerTwoName={playerTwoName}
             />
           }
         >
           <CompareRadarChart
             data={radar}
-            haalandName={haalandName}
-            mbappeName={mbappeName}
+            playerOneName={playerOneName}
+            playerTwoName={playerTwoName}
           />
         </ChartShell>
 
@@ -71,16 +71,16 @@ export function CompareChartsSection({
           description="Absolute career metrics"
           height={CHART_HEIGHT.lg}
           legend={
-            <HaalandMbappeLegend
-              haalandName={haalandName}
-              mbappeName={mbappeName}
+            <DualPlayerLegend
+              playerOneName={playerOneName}
+              playerTwoName={playerTwoName}
             />
           }
         >
           <CompareBarChart
             data={bars}
-            haalandName={haalandName}
-            mbappeName={mbappeName}
+            playerOneName={playerOneName}
+            playerTwoName={playerTwoName}
           />
         </ChartShell>
 
@@ -90,21 +90,21 @@ export function CompareChartsSection({
           height={CHART_HEIGHT.md}
           className="lg:col-span-2"
           legend={
-            <HaalandMbappeLegend
-              haalandName={haalandName}
-              mbappeName={mbappeName}
+            <DualPlayerLegend
+              playerOneName={playerOneName}
+              playerTwoName={playerTwoName}
             />
           }
         >
           <DualSeasonLineChart
             data={dualLine}
-            haalandName={haalandName}
-            mbappeName={mbappeName}
+            playerOneName={playerOneName}
+            playerTwoName={playerTwoName}
           />
         </ChartShell>
 
         <ChartShell
-          title={`${haalandName} goals split`}
+          title={`${playerOneName} goals split`}
           description="Club vs international"
           height={CHART_HEIGHT.sm}
           legend={
@@ -116,11 +116,11 @@ export function CompareChartsSection({
             />
           }
         >
-          <GoalsPieChart data={haalandPie} />
+          <GoalsPieChart data={playerOnePie} />
         </ChartShell>
 
         <ChartShell
-          title={`${mbappeName} goals split`}
+          title={`${playerTwoName} goals split`}
           description="Club vs international"
           height={CHART_HEIGHT.sm}
           legend={
@@ -132,7 +132,7 @@ export function CompareChartsSection({
             />
           }
         >
-          <GoalsPieChart data={mbappePie} />
+          <GoalsPieChart data={playerTwoPie} />
         </ChartShell>
       </div>
     </Section>

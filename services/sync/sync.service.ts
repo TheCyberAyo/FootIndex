@@ -1,24 +1,25 @@
-import {
-  API_FOOTBALL_PLAYERS,
-  DEFAULT_SYNC_SEASON,
-  type TrackedPlayerKey,
-} from "@/lib/api-football/constants";
+import { DEFAULT_SYNC_SEASON, RECENT_MATCHES_PER_PLAYER } from "@/lib/api-football/constants";
 import { isApiFootballConfigured } from "@/lib/api-football/client";
-import { SEED_PLAYER_IDS } from "@/lib/data/seed-ids";
 import { getServerEnv, isSupabaseAdminConfigured } from "@/lib/env";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
   fetchPlayerById,
   fetchRecentFixturesForPlayerClub,
 } from "@/services/api-football/endpoints";
-import { RECENT_MATCHES_PER_PLAYER } from "@/lib/api-football/constants";
 import { ServiceError, assertNoError } from "@/services/errors";
+import { slugify } from "@/lib/slug";
 import {
   mapFixture,
   mapPlayerProfileUpdate,
   mapPositionFromStats,
   mapSeasonStatistics,
 } from "@/services/sync/mappers";
+import {
+  getSyncablePlayerBySlug,
+  listSyncablePlayers,
+  requireSyncablePlayer,
+  type SyncablePlayer,
+} from "@/services/sync/syncable-players";
 
 export type SyncJob = "players" | "fixtures" | "all";
 
@@ -38,14 +39,29 @@ function resolveSeason(): number {
   return Number.isFinite(parsed) ? parsed : DEFAULT_SYNC_SEASON;
 }
 
-function playerUuidForSlug(slug: string): string {
-  if (slug === "haaland") {
-    return SEED_PLAYER_IDS.haaland;
+async function ensureUniqueTeamSlug(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  baseSlug: string,
+  excludeId?: string,
+): Promise<string> {
+  let candidate = baseSlug;
+  let suffix = 2;
+
+  while (true) {
+    let query = supabase.from("teams").select("id").eq("slug", candidate);
+    if (excludeId) {
+      query = query.neq("id", excludeId);
+    }
+    const existing = await query.maybeSingle();
+    assertNoError(existing.error, "Failed to check team slug");
+
+    if (!existing.data) {
+      return candidate;
+    }
+
+    candidate = `${baseSlug}-${suffix}`;
+    suffix += 1;
   }
-  if (slug === "mbappe") {
-    return SEED_PLAYER_IDS.mbappe;
-  }
-  throw new ServiceError(`Unknown player slug: ${slug}`, "UNKNOWN_PLAYER");
 }
 
 async function ensureTeamByApiId(
@@ -75,9 +91,12 @@ async function ensureTeamByApiId(
     return existing.data.id;
   }
 
+  const slug = await ensureUniqueTeamSlug(supabase, slugify(name));
+
   const inserted = await supabase
     .from("teams")
     .insert({
+      slug,
       name,
       short_name: name,
       country: "Unknown",
@@ -98,16 +117,14 @@ async function ensureTeamByApiId(
 }
 
 async function syncOnePlayer(
-  key: TrackedPlayerKey,
+  player: SyncablePlayer,
   season: number,
 ): Promise<Record<string, unknown>> {
-  const config = API_FOOTBALL_PLAYERS[key];
-  const playerUuid = playerUuidForSlug(config.slug);
-  const payload = await fetchPlayerById(config.apiId, season);
+  const payload = await fetchPlayerById(player.apiFootballId, season);
 
   if (!payload) {
     throw new ServiceError(
-      `No API-Football player payload for ${config.slug} (${config.apiId})`,
+      `No API-Football player payload for ${player.slug} (${player.apiFootballId})`,
       "PLAYER_NOT_FOUND",
     );
   }
@@ -140,15 +157,15 @@ async function syncOnePlayer(
       current_team_id: currentTeamId,
       api_football_id: profile.api_football_id,
     })
-    .eq("id", playerUuid)
+    .eq("id", player.id)
     .select("id")
     .maybeSingle();
 
-  assertNoError(playerUpdate.error, `Failed to update player ${config.slug}`);
+  assertNoError(playerUpdate.error, `Failed to update player ${player.slug}`);
 
   if (!playerUpdate.data) {
     throw new ServiceError(
-      `Player row missing for ${config.slug}. Run supabase/seed.sql first.`,
+      `Player row missing for ${player.slug}. Run supabase/seed.sql first.`,
       "PLAYER_ROW_MISSING",
     );
   }
@@ -164,7 +181,7 @@ async function syncOnePlayer(
 
     const upsert = await supabase.from("season_stats").upsert(
       {
-        player_id: playerUuid,
+        player_id: player.id,
         team_id: teamId,
         season: stat.season,
         competition: stat.competition,
@@ -178,21 +195,19 @@ async function syncOnePlayer(
       { onConflict: "player_id,season,competition" },
     );
 
-    assertNoError(upsert.error, `Failed to upsert season stats for ${config.slug}`);
+    assertNoError(upsert.error, `Failed to upsert season stats for ${player.slug}`);
   }
 
-  // Decision: curated career_stats / trophies / awards stay untouched on Free plan.
-  // Partial season rows must not overwrite full career baselines.
   const careerResult = await supabase
     .from("career_stats")
     .select("goals")
-    .eq("player_id", playerUuid)
+    .eq("player_id", player.id)
     .maybeSingle();
   assertNoError(careerResult.error, "Failed to read curated career stats");
 
   return {
-    slug: config.slug,
-    apiId: config.apiId,
+    slug: player.slug,
+    apiId: player.apiFootballId,
     seasonRows: seasonStats.length,
     careerGoalsPreserved: careerResult.data?.goals ?? null,
     careerSource: "curated",
@@ -200,13 +215,19 @@ async function syncOnePlayer(
 }
 
 async function syncPlayerAppearances(
-  key: TrackedPlayerKey,
+  player: SyncablePlayer,
   season: number,
 ): Promise<Record<string, unknown>> {
-  const config = API_FOOTBALL_PLAYERS[key];
-  const playerUuid = playerUuidForSlug(config.slug);
+  if (player.teamApiId == null) {
+    return {
+      slug: player.slug,
+      skipped: true,
+      reason: "No club api_football_id on current_team",
+    };
+  }
+
   const fixtures = await fetchRecentFixturesForPlayerClub(
-    config.teamApiId,
+    player.teamApiId,
     season,
     RECENT_MATCHES_PER_PLAYER,
   );
@@ -265,20 +286,18 @@ async function syncPlayerAppearances(
       continue;
     }
 
-    // Player filter means they appeared — attribute to preferred club when present.
     const playerTeamApiId =
-      mapped.home_team_api_id === config.teamApiId
+      mapped.home_team_api_id === player.teamApiId
         ? mapped.home_team_api_id
-        : mapped.away_team_api_id === config.teamApiId
+        : mapped.away_team_api_id === player.teamApiId
           ? mapped.away_team_api_id
           : mapped.home_team_api_id;
     const playerTeamId =
       playerTeamApiId === mapped.home_team_api_id ? homeTeamId : awayTeamId;
 
-    // Insert-only so curated/seeded line stats are not wiped on re-sync.
     const statsUpsert = await supabase.from("player_stats").upsert(
       {
-        player_id: playerUuid,
+        player_id: player.id,
         match_id: matchId,
         team_id: playerTeamId,
         minutes:
@@ -290,32 +309,36 @@ async function syncPlayerAppearances(
     );
     assertNoError(
       statsUpsert.error,
-      `Failed to upsert appearance for ${config.slug}`,
+      `Failed to upsert appearance for ${player.slug}`,
     );
     appearancesUpserted += 1;
   }
 
   return {
-    slug: config.slug,
+    slug: player.slug,
     fixturesFetched: fixtures.length,
     matchesUpserted,
     appearancesUpserted,
   };
 }
 
-async function syncFixtures(season: number): Promise<Record<string, unknown>> {
-  const haaland = await syncPlayerAppearances("haaland", season);
-  const mbappe = await syncPlayerAppearances("mbappe", season);
-  return {
+async function syncFixtures(
+  players: SyncablePlayer[],
+  season: number,
+): Promise<Record<string, unknown>> {
+  const results: Record<string, unknown> = {
     perPlayerLimit: RECENT_MATCHES_PER_PLAYER,
-    haaland,
-    mbappe,
   };
+
+  for (const player of players) {
+    results[player.slug] = await syncPlayerAppearances(player, season);
+  }
+
+  return results;
 }
 
 /**
- * Orchestrates API-Football → Supabase sync.
- * Decision: admin client only (RLS blocks writes on stats tables for anon).
+ * Orchestrates API-Football → Supabase sync for every player with api_football_id.
  */
 export async function runSyncJob(job: SyncJob = "all"): Promise<SyncJobResult> {
   if (!isApiFootballConfigured()) {
@@ -332,18 +355,28 @@ export async function runSyncJob(job: SyncJob = "all"): Promise<SyncJobResult> {
   }
 
   const season = resolveSeason();
+  const syncablePlayers = await listSyncablePlayers();
   const details: Record<string, unknown> = {
     season,
     siteUrl: getServerEnv().siteUrl,
+    playerCount: syncablePlayers.length,
   };
 
+  if (syncablePlayers.length === 0) {
+    details.warning =
+      "No players with api_football_id found. Run supabase/seed.sql first.";
+  }
+
   if (job === "players" || job === "all") {
-    details.haaland = await syncOnePlayer("haaland", season);
-    details.mbappe = await syncOnePlayer("mbappe", season);
+    const playerResults: Record<string, unknown> = {};
+    for (const player of syncablePlayers) {
+      playerResults[player.slug] = await syncOnePlayer(player, season);
+    }
+    details.players = playerResults;
   }
 
   if (job === "fixtures" || job === "all") {
-    details.fixtures = await syncFixtures(season);
+    details.fixtures = await syncFixtures(syncablePlayers, season);
   }
 
   return {
@@ -352,6 +385,14 @@ export async function runSyncJob(job: SyncJob = "all"): Promise<SyncJobResult> {
     ok: true,
     details,
   };
+}
+
+export async function syncPlayerBySlug(
+  slug: string,
+  season = resolveSeason(),
+): Promise<Record<string, unknown>> {
+  const player = requireSyncablePlayer(await getSyncablePlayerBySlug(slug), slug);
+  return syncOnePlayer(player, season);
 }
 
 export function assertCronAuthorized(authHeader: string | null): void {

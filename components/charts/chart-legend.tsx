@@ -25,19 +25,22 @@ export function ChartLegend({ items, className }: ChartLegendProps) {
   );
 }
 
-export function HaalandMbappeLegend({
-  haalandName,
-  mbappeName,
+export function DualPlayerLegend({
+  playerOneName,
+  playerTwoName,
 }: {
-  haalandName: string;
-  mbappeName: string;
+  playerOneName: string;
+  playerTwoName: string;
 }) {
   return (
     <ChartLegend
       items={[
-        { label: haalandName, color: CHART_COLORS.haaland },
-        { label: mbappeName, color: CHART_COLORS.mbappe },
+        { label: playerOneName, color: CHART_COLORS.haaland },
+        { label: playerTwoName, color: CHART_COLORS.mbappe },
       ]}
     />
   );
 }
+
+/** @deprecated Use DualPlayerLegend */
+export const HaalandMbappeLegend = DualPlayerLegend;

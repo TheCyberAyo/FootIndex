@@ -49,7 +49,9 @@ function takeRecentPerPlayer(cards: LiveScoreCard[]): LiveScoreCard[] {
   }
 
   const result: LiveScoreCard[] = [];
-  for (const slug of ["haaland", "mbappe"]) {
+  const slugs = Array.from(bySlug.keys()).sort();
+
+  for (const slug of slugs) {
     const list = (bySlug.get(slug) ?? [])
       .slice()
       .sort((a, b) => b.match.kickoff_at.localeCompare(a.match.kickoff_at))

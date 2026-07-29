@@ -1,6 +1,6 @@
 import {
   ChartLegend,
-  HaalandMbappeLegend,
+  DualPlayerLegend,
 } from "@/components/charts/chart-legend";
 import { ChartShell } from "@/components/charts/chart-shell";
 import { CompareRadarChart } from "@/components/charts/compare-radar-chart";
@@ -19,30 +19,33 @@ import type { PlayerProfile } from "@/types/domain";
 
 interface PlayerChartsSectionProps {
   profile: PlayerProfile;
-  rival: PlayerProfile;
+  rival?: PlayerProfile;
 }
 
 /**
- * Player page charts — pie + season line for self, radar vs rival.
+ * Player page charts — pie + season line for self; radar when a rival exists.
  */
 export function PlayerChartsSection({
   profile,
   rival,
 }: PlayerChartsSectionProps) {
-  const isHaaland = profile.player.slug === "haaland";
-  const haaland = isHaaland ? profile : rival;
-  const mbappe = isHaaland ? rival : profile;
-  const comparison = buildComparison(haaland, mbappe);
-  const radar = buildRadarSeries(comparison.metrics);
   const pie = buildGoalsPie(profile.career);
   const progression = buildSeasonProgression(profile.seasons);
+  const hasRival = rival != null;
+  const comparison =
+    hasRival && rival ? buildComparison(profile, rival) : null;
+  const radar = comparison ? buildRadarSeries(comparison.metrics) : null;
 
   return (
     <Section
       id="charts"
       eyebrow="Visuals"
       title="Charts"
-      description="Season progression from synced competition rows. Radar includes the rival for context."
+      description={
+        hasRival
+          ? "Season progression from synced competition rows. Radar includes a comparison partner for context."
+          : "Season progression from synced competition rows."
+      }
     >
       <div className="grid gap-4 lg:grid-cols-2">
         <ChartShell
@@ -77,24 +80,26 @@ export function PlayerChartsSection({
           <SeasonLineChart data={progression} />
         </ChartShell>
 
-        <ChartShell
-          title="Ability radar"
-          description={`Normalized vs ${rival.player.short_name}`}
-          height={CHART_HEIGHT.lg}
-          className="lg:col-span-2"
-          legend={
-            <HaalandMbappeLegend
-              haalandName={haaland.player.short_name}
-              mbappeName={mbappe.player.short_name}
+        {hasRival && rival && radar ? (
+          <ChartShell
+            title="Ability radar"
+            description={`Normalized vs ${rival.player.short_name}`}
+            height={CHART_HEIGHT.lg}
+            className="lg:col-span-2"
+            legend={
+              <DualPlayerLegend
+                playerOneName={profile.player.short_name}
+                playerTwoName={rival.player.short_name}
+              />
+            }
+          >
+            <CompareRadarChart
+              data={radar}
+              playerOneName={profile.player.short_name}
+              playerTwoName={rival.player.short_name}
             />
-          }
-        >
-          <CompareRadarChart
-            data={radar}
-            haalandName={haaland.player.short_name}
-            mbappeName={mbappe.player.short_name}
-          />
-        </ChartShell>
+          </ChartShell>
+        ) : null}
       </div>
     </Section>
   );

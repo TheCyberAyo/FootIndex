@@ -1,6 +1,8 @@
+import Link from "next/link";
 import Image from "next/image";
 
 import { Container } from "@/components/shared/container";
+import { teamPath } from "@/lib/teams/paths";
 import {
   formatHeight,
   formatPosition,
@@ -72,7 +74,16 @@ export function PlayerHero({ profile }: PlayerHeroProps) {
             <p className="text-xs tracking-wide text-white/40 uppercase">
               Current club
             </p>
-            <p className="font-medium text-white">{club}</p>
+            {player.current_team?.slug ? (
+              <Link
+                href={teamPath(player.current_team.slug)}
+                className="font-medium text-white hover:text-brand"
+              >
+                {club}
+              </Link>
+            ) : (
+              <p className="font-medium text-white">{club}</p>
+            )}
           </div>
         </div>
       </Container>

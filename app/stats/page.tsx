@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import {
   ChartLegend,
-  HaalandMbappeLegend,
+  DualPlayerLegend,
 } from "@/components/charts/chart-legend";
 import { ChartShell } from "@/components/charts/chart-shell";
 import { CompareBarChart } from "@/components/charts/compare-bar-chart";
@@ -180,32 +180,32 @@ export default async function StatsPage() {
             title="Career bars"
             height={CHART_HEIGHT.md}
             legend={
-              <HaalandMbappeLegend
-                haalandName={haaland.player.short_name}
-                mbappeName={mbappe.player.short_name}
+              <DualPlayerLegend
+                playerOneName={haaland.player.short_name}
+                playerTwoName={mbappe.player.short_name}
               />
             }
           >
             <CompareBarChart
               data={bars}
-              haalandName={haaland.player.short_name}
-              mbappeName={mbappe.player.short_name}
+              playerOneName={haaland.player.short_name}
+              playerTwoName={mbappe.player.short_name}
             />
           </ChartShell>
           <ChartShell
             title="Season goals"
             height={CHART_HEIGHT.md}
             legend={
-              <HaalandMbappeLegend
-                haalandName={haaland.player.short_name}
-                mbappeName={mbappe.player.short_name}
+              <DualPlayerLegend
+                playerOneName={haaland.player.short_name}
+                playerTwoName={mbappe.player.short_name}
               />
             }
           >
             <DualSeasonLineChart
               data={dualLine}
-              haalandName={haaland.player.short_name}
-              mbappeName={mbappe.player.short_name}
+              playerOneName={haaland.player.short_name}
+              playerTwoName={mbappe.player.short_name}
             />
           </ChartShell>
           <ChartShell

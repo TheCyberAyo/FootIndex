@@ -21,6 +21,14 @@ export function createWebSiteJsonLd() {
     url: SITE_URL,
     description: SITE_DESCRIPTION,
     inLanguage: "en",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
     publisher: {
       "@type": "Organization",
       name: SITE_NAME,

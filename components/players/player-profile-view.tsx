@@ -11,12 +11,14 @@ import { PlayerTimeline } from "@/components/players/player-timeline";
 import { PlayerVideosPlaceholder } from "@/components/players/player-videos-placeholder";
 import { Section } from "@/components/shared/section";
 import { Button } from "@/components/ui/button";
+import { compareCanonicalPath, defaultComparePath } from "@/lib/compare";
+import { playerPath } from "@/lib/players/paths";
 import { buildCareerTimeline } from "@/lib/players/timeline";
 import type { PlayerProfile } from "@/types/domain";
 
 interface PlayerProfileViewProps {
   profile: PlayerProfile;
-  rival: PlayerProfile;
+  rival?: PlayerProfile | null;
   compareHref?: string;
 }
 
@@ -26,8 +28,13 @@ interface PlayerProfileViewProps {
 export function PlayerProfileView({
   profile,
   rival,
-  compareHref = "/compare",
+  compareHref,
 }: PlayerProfileViewProps) {
+  const resolvedCompareHref =
+    compareHref ??
+    (rival
+      ? compareCanonicalPath(profile.player.slug, rival.player.slug)
+      : defaultComparePath());
   const timeline = buildCareerTimeline({
     trophies: profile.trophies,
     awards: profile.awards,
@@ -45,12 +52,12 @@ export function PlayerProfileView({
         awards={profile.awards}
       />
       <PlayerTimeline events={timeline} />
-      <PlayerChartsSection profile={profile} rival={rival} />
+      <PlayerChartsSection profile={profile} rival={rival ?? undefined} />
       <PlayerVideosPlaceholder playerName={profile.player.name} />
       <CommentsSection
         entityType="player"
         entityId={profile.player.slug}
-        nextPath={`/${profile.player.slug}#comments`}
+        nextPath={`${playerPath(profile.player.slug)}#comments`}
         title={`Talk ${profile.player.short_name}`}
       />
 
@@ -60,7 +67,7 @@ export function PlayerProfileView({
             asChild
             className="bg-brand text-brand-foreground hover:bg-brand/90"
           >
-            <Link href={compareHref}>Compare Players</Link>
+            <Link href={resolvedCompareHref}>Compare Players</Link>
           </Button>
           <Button
             asChild

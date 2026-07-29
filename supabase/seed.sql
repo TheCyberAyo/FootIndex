@@ -5,16 +5,16 @@
 begin;
 
 -- Teams
-insert into public.teams (id, name, short_name, country, team_type, api_football_id) values
-  ('11111111-1111-4111-8111-111111111101', 'Manchester City', 'Man City', 'England', 'club', 50),
-  ('11111111-1111-4111-8111-111111111102', 'Real Madrid', 'Real Madrid', 'Spain', 'club', 541),
-  ('11111111-1111-4111-8111-111111111103', 'Norway', 'Norway', 'Norway', 'national', 1099),
-  ('11111111-1111-4111-8111-111111111104', 'France', 'France', 'France', 'national', 2),
-  ('11111111-1111-4111-8111-111111111105', 'Borussia Dortmund', 'Dortmund', 'Germany', 'club', 165),
-  ('11111111-1111-4111-8111-111111111106', 'Paris Saint Germain', 'PSG', 'France', 'club', 85),
-  ('11111111-1111-4111-8111-111111111107', 'AS Monaco', 'Monaco', 'France', 'club', 91),
-  ('11111111-1111-4111-8111-111111111108', 'Molde FK', 'Molde', 'Norway', 'club', 348),
-  ('11111111-1111-4111-8111-111111111109', 'Red Bull Salzburg', 'Salzburg', 'Austria', 'club', 571);
+insert into public.teams (id, slug, name, short_name, country, team_type, api_football_id) values
+  ('11111111-1111-4111-8111-111111111101', 'manchester-city', 'Manchester City', 'Man City', 'England', 'club', 50),
+  ('11111111-1111-4111-8111-111111111102', 'real-madrid', 'Real Madrid', 'Real Madrid', 'Spain', 'club', 541),
+  ('11111111-1111-4111-8111-111111111103', 'norway', 'Norway', 'Norway', 'Norway', 'national', 1099),
+  ('11111111-1111-4111-8111-111111111104', 'france', 'France', 'France', 'France', 'national', 2),
+  ('11111111-1111-4111-8111-111111111105', 'borussia-dortmund', 'Borussia Dortmund', 'Dortmund', 'Germany', 'club', 165),
+  ('11111111-1111-4111-8111-111111111106', 'paris-saint-germain', 'Paris Saint Germain', 'PSG', 'France', 'club', 85),
+  ('11111111-1111-4111-8111-111111111107', 'as-monaco', 'AS Monaco', 'Monaco', 'France', 'club', 91),
+  ('11111111-1111-4111-8111-111111111108', 'molde-fk', 'Molde FK', 'Molde', 'Norway', 'club', 348),
+  ('11111111-1111-4111-8111-111111111109', 'red-bull-salzburg', 'Red Bull Salzburg', 'Salzburg', 'Austria', 'club', 571);
 
 -- Players
 insert into public.players (

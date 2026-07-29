@@ -90,27 +90,27 @@ function metricFromPair(
   haalandValue: number | null,
   mbappeValue: number | null,
 ): CompareMetric {
-  const h = haalandValue ?? 0;
-  const m = mbappeValue ?? 0;
+  const playerOneValue = haalandValue ?? 0;
+  const playerTwoValue = mbappeValue ?? 0;
   let winner: MetricWinner = "tie";
   if (haalandValue == null && mbappeValue == null) {
     winner = "tie";
   } else if (haalandValue == null) {
-    winner = mbappeValue != null && mbappeValue > 0 ? "mbappe" : "tie";
+    winner = mbappeValue != null && mbappeValue > 0 ? "playerTwo" : "tie";
   } else if (mbappeValue == null) {
-    winner = haalandValue > 0 ? "haaland" : "tie";
+    winner = haalandValue > 0 ? "playerOne" : "tie";
   } else {
-    winner = decideWinner(h, m);
+    winner = decideWinner(playerOneValue, playerTwoValue);
   }
 
   return {
     key,
     label,
     format: "integer",
-    haalandValue: h,
-    mbappeValue: m,
+    playerOneValue,
+    playerTwoValue,
     winner,
-    delta: Math.abs(h - m),
+    delta: Math.abs(playerOneValue - playerTwoValue),
   };
 }
 

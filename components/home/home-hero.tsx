@@ -4,14 +4,20 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 
+import { PlayerSearch } from "@/components/search/player-search";
 import { Button } from "@/components/ui/button";
+import type { PlayerSearchResult } from "@/types/domain";
+
+interface HomeHeroProps {
+  trending?: PlayerSearchResult[];
+}
 
 /**
  * Full-bleed hero: rivalry portrait as the dominant visual plane.
  * Text sits in the center gap with a light scrim for readability —
  * no floating badges/cards in the first viewport.
  */
-export function HomeHero() {
+export function HomeHero({ trending = [] }: HomeHeroProps) {
   return (
     <section className="relative isolate min-h-[100svh] overflow-hidden border-b border-white/10">
       <Image
@@ -67,12 +73,21 @@ export function HomeHero() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          Career goals, club vs country, trophies — Haaland vs Mbappé,
-          season by season.
+          Career goals, club vs country, trophies — search any player or
+          compare Haaland vs Mbappé season by season.
         </motion.p>
 
         <motion.div
-          className="mt-10 flex flex-col gap-3 sm:flex-row"
+          className="mt-8 w-full"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.35 }}
+        >
+          <PlayerSearch variant="hero" trending={trending} />
+        </motion.div>
+
+        <motion.div
+          className="mt-8 flex flex-col gap-3 sm:flex-row"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.4 }}
@@ -82,7 +97,7 @@ export function HomeHero() {
             size="lg"
             className="h-11 bg-brand px-6 text-brand-foreground hover:bg-brand/90"
           >
-            <Link href="/compare">Compare Career Stats</Link>
+            <Link href="/compare/haaland/mbappe">Compare Career Stats</Link>
           </Button>
           <Button
             asChild
@@ -98,7 +113,7 @@ export function HomeHero() {
             variant="ghost"
             className="h-11 px-6 text-white hover:bg-white/10"
           >
-            <Link href="/compare#vote">Vote Now</Link>
+            <Link href="/compare/haaland/mbappe#vote">Vote Now</Link>
           </Button>
         </motion.div>
       </div>

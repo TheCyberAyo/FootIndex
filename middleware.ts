@@ -59,10 +59,10 @@ export const config = {
   matcher: [
     "/",
     "/compare",
+    "/compare/:path*",
     "/login",
-    "/haaland",
-    "/mbappe",
-    "/players/:path*",
+    "/search",
+    "/player/:path*",
     "/stats",
     "/news",
     "/news/:path*",
