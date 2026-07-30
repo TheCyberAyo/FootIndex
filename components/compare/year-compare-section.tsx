@@ -3,7 +3,7 @@
 import { useDeferredValue, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { CompareMetricRow } from "@/components/compare/compare-metric-row";
+import { CompareMetricsTable } from "@/components/compare/compare-metrics-table";
 import { Section } from "@/components/shared/section";
 import { Button } from "@/components/ui/button";
 import {
@@ -149,10 +149,10 @@ export function YearCompareSection({
             }
           }}
           placeholder="Search year, season, or club…"
-          className="h-11 w-full rounded-xl border border-glass-border bg-glass px-4 text-sm text-white outline-none backdrop-blur-xl placeholder:text-white/35 focus-visible:border-brand/50 focus-visible:ring-2 focus-visible:ring-brand/30 sm:max-w-md"
+          className="h-11 w-full rounded-xl border border-input bg-background/80 px-4 text-sm text-foreground outline-none backdrop-blur-sm placeholder:text-muted-foreground focus-visible:border-brand/50 focus-visible:ring-2 focus-visible:ring-brand/30 sm:max-w-md"
         />
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-xs text-white/35">
+          <p className="text-xs text-muted-foreground">
             {seasonTabs.length} season{seasonTabs.length === 1 ? "" : "s"} · synced
             stats
           </p>
@@ -165,7 +165,7 @@ export function YearCompareSection({
       </div>
 
       {allRows.length === 0 ? (
-        <p className="rounded-2xl border border-glass-border bg-glass px-4 py-8 text-center text-sm text-white/50 backdrop-blur-xl">
+        <p className="rounded-2xl border border-glass-border bg-glass px-4 py-8 text-center text-sm text-muted-foreground backdrop-blur-xl">
           No season-by-season club data yet for this pair. Sync players from admin
           to populate season stats.
         </p>
@@ -193,47 +193,49 @@ export function YearCompareSection({
           </div>
 
           {seasons.length === 0 ? (
-            <p className="rounded-2xl border border-glass-border bg-glass px-4 py-8 text-center text-sm text-white/50 backdrop-blur-xl">
+            <p className="rounded-2xl border border-glass-border bg-glass px-4 py-8 text-center text-sm text-muted-foreground backdrop-blur-xl">
               No seasons match “{query}”. Try a year, season label, or club name.
             </p>
           ) : selectedRow ? (
             <div className="space-y-6">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border border-glass-border bg-glass px-4 py-4 backdrop-blur-xl">
-                  <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
+                  <p className="text-xs tracking-[0.18em] text-muted-foreground uppercase">
                     {playerOneName} · {selectedRow.season}
                   </p>
-                  <p className="mt-2 font-display text-lg font-bold text-white">
+                  <p className="mt-2 font-display text-lg font-bold text-foreground">
                     {formatDynamicSeasonClub(selectedRow.playerOne)}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-glass-border bg-glass px-4 py-4 backdrop-blur-xl">
-                  <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
+                  <p className="text-xs tracking-[0.18em] text-muted-foreground uppercase">
                     {playerTwoName} · {selectedRow.season}
                   </p>
-                  <p className="mt-2 font-display text-lg font-bold text-white">
+                  <p className="mt-2 font-display text-lg font-bold text-foreground">
                     {formatDynamicSeasonClub(selectedRow.playerTwo)}
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {seasonMetrics.map((metric) => (
-                  <CompareMetricRow key={metric.key} metric={metric} />
-                ))}
-              </div>
+              <CompareMetricsTable
+                metrics={seasonMetrics}
+                playerOneName={playerOneName}
+                playerTwoName={playerTwoName}
+              />
 
               {calendarYear != null && international ? (
                 <div className="space-y-3">
                   <p className="text-xs tracking-[0.18em] text-brand uppercase">
                     Country · calendar {calendarYear}
                   </p>
-                  {intlMetrics.map((metric) => (
-                    <CompareMetricRow key={metric.key} metric={metric} />
-                  ))}
+                  <CompareMetricsTable
+                    metrics={intlMetrics}
+                    playerOneName={playerOneName}
+                    playerTwoName={playerTwoName}
+                  />
                 </div>
               ) : (
-                <p className="text-center text-xs text-white/35">
+                <p className="text-center text-xs text-muted-foreground">
                   Tip: search a calendar year (e.g. 2023) to compare international
                   goals for that year.
                 </p>

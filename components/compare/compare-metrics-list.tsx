@@ -2,34 +2,35 @@
 
 import { motion } from "framer-motion";
 
-import { CompareMetricRow } from "@/components/compare/compare-metric-row";
+import { CompareMetricsTable } from "@/components/compare/compare-metrics-table";
 import type { CompareMetric } from "@/lib/compare";
 
 interface CompareMetricsListProps {
   metrics: CompareMetric[];
+  playerOneName: string;
+  playerTwoName: string;
 }
 
 /**
- * Client island only for staggered reveal — metric math stays on the server.
+ * Client island for subtle entrance — metric math stays on the server.
  */
-export function CompareMetricsList({ metrics }: CompareMetricsListProps) {
+export function CompareMetricsList({
+  metrics,
+  playerOneName,
+  playerTwoName,
+}: CompareMetricsListProps) {
   return (
-    <div className="grid gap-3">
-      {metrics.map((metric, index) => (
-        <motion.div
-          key={metric.key}
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{
-            duration: 0.35,
-            delay: Math.min(index * 0.04, 0.28),
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        >
-          <CompareMetricRow metric={metric} />
-        </motion.div>
-      ))}
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <CompareMetricsTable
+        metrics={metrics}
+        playerOneName={playerOneName}
+        playerTwoName={playerTwoName}
+      />
+    </motion.div>
   );
 }

@@ -77,7 +77,8 @@ export function CareerComparePreview({
       <div className="pt-2">
         <Button
           asChild
-          className="w-full bg-brand text-brand-foreground hover:bg-brand/90 sm:w-auto"
+          variant="brand"
+          className="w-full sm:w-auto"
         >
           <Link href={defaultComparePath()}>Open full comparison</Link>
         </Button>

@@ -2,6 +2,7 @@ import { CompareChartsSection } from "@/components/charts/compare-charts-section
 import { CommentsSection } from "@/components/comments/comments-section";
 import { CompareMetricsList } from "@/components/compare/compare-metrics-list";
 import { CompareScoreboardCard } from "@/components/compare/compare-scoreboard";
+import { ComparePlayerPickerLazy } from "@/components/compare/compare-player-picker-lazy";
 import { CompareStickyHeader } from "@/components/compare/compare-sticky-header";
 import { CompareSummarySection } from "@/components/compare/compare-summary-section";
 import { YearCompareLazy } from "@/components/compare/year-compare-lazy";
@@ -47,10 +48,19 @@ export function CompareBoard({
         playerTwoWins={comparison.scoreboard.playerTwoWins}
       />
 
+      <ComparePlayerPickerLazy
+        playerOneSlug={playerOne.player.slug}
+        playerOneName={playerOneName}
+        playerOneImageUrl={playerOne.player.image_url}
+        playerTwoSlug={playerTwo.player.slug}
+        playerTwoName={playerTwoName}
+        playerTwoImageUrl={playerTwo.player.image_url}
+      />
+
       <Section
         eyebrow="Head to head"
         title={`${playerOneName} vs ${playerTwoName}`}
-        description="Leaders glow City blue. Bars scale to the higher value in each row."
+        description="Leaders highlighted in brand blue. Same table layout on every screen size."
       >
         <div className="mb-8">
           <CompareScoreboardCard
@@ -59,7 +69,11 @@ export function CompareBoard({
             playerTwoName={playerTwoName}
           />
         </div>
-        <CompareMetricsList metrics={comparison.metrics} />
+        <CompareMetricsList
+          metrics={comparison.metrics}
+          playerOneName={playerOneName}
+          playerTwoName={playerTwoName}
+        />
       </Section>
 
       <CompareSummarySection
@@ -92,9 +106,9 @@ export function CompareBoard({
       />
 
       <Container className="pb-12">
-        <p className="text-center text-xs text-white/35">
-          {playerOneName} left · {playerTwoName} right · Mobile stacks values
-          under each metric
+        <p className="text-center text-xs text-muted-foreground">
+          {playerOneName} · {playerTwoName} · Scroll the table horizontally on
+          very small screens if needed
         </p>
       </Container>
     </>

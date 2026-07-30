@@ -108,7 +108,7 @@ export function LoginForm({
         <Button
           type="submit"
           disabled={status === "loading"}
-          className="bg-brand text-brand-foreground hover:bg-brand/90"
+          variant="brand"
         >
           {status === "loading" ? "Sending…" : "Email magic link"}
         </Button>

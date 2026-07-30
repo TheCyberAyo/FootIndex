@@ -19,6 +19,7 @@ export {
 export {
   comparePath,
   compareCanonicalPath,
+  replaceComparePlayerPath,
   compareEntityId,
   isValidCompareSlugPair,
   isFeaturedRivalryCompare,

@@ -115,7 +115,7 @@ export async function TeamRoutePage({ slug }: TeamRoutePageProps) {
         <div className="flex flex-col gap-3 sm:flex-row">
           <Button
             asChild
-            className="bg-brand text-brand-foreground hover:bg-brand/90"
+            variant="brand"
           >
             <Link href="/rankings/top-scorers">Top scorers</Link>
           </Button>

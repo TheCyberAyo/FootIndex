@@ -61,6 +61,14 @@ See [`docs/PHASE_3_SYNC.md`](./docs/PHASE_3_SYNC.md) to sync API-Football → Su
 
 - [PROJECT_RULES.md](./PROJECT_RULES.md) — coding standards
 
+## Design system
+
+- [styles/tokens.css](./styles/tokens.css) — semantic colours, typography, surfaces, shadows
+- [styles/brand.css](./styles/brand.css) — brand accent + glass surfaces
+- [lib/design-tokens.ts](./lib/design-tokens.ts) — JS mirror for charts / OG images
+- Shared UI: `EmptyState`, `ErrorState`, `LoadingSkeleton`, `StatCard`, `GlassCard`
+- Primary CTA: `<Button variant="brand">`
+
 ## Architecture notes
 
 - **SEO:** Next.js Metadata API (`lib/seo.ts`)

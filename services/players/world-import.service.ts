@@ -10,6 +10,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { fetchTeamSquad } from "@/services/api-football/endpoints";
 import { assertNoError, ServiceError } from "@/services/errors";
 import { importPlayerByApiId } from "@/services/players/player-import.service";
+import { ensureTeamByApiRef } from "@/services/reference/reference-entities.service";
 import { mapPosition } from "@/services/sync/mappers";
 import type { ApiFootballSquadPlayer } from "@/lib/api-football/types";
 import type { PlayerPosition } from "@/types/database";
@@ -84,18 +85,25 @@ async function ensureUniquePlayerSlug(baseSlug: string): Promise<string> {
 async function importSquadPlayer(
   squadPlayer: ApiFootballSquadPlayer,
   team: WorldTeamSeed,
+  teamId: string,
 ): Promise<"created" | "skipped"> {
   const supabase = createSupabaseAdminClient();
 
   const existingByApi = await supabase
     .from("players")
-    .select("id")
+    .select("id, current_team_id")
     .eq("api_football_id", squadPlayer.id)
     .maybeSingle();
 
   assertNoError(existingByApi.error, "Failed to look up player by API id");
 
   if (existingByApi.data) {
+    if (!existingByApi.data.current_team_id) {
+      await supabase
+        .from("players")
+        .update({ current_team_id: teamId })
+        .eq("id", existingByApi.data.id);
+    }
     return "skipped";
   }
 
@@ -114,6 +122,7 @@ async function importSquadPlayer(
     bio: `${squadPlayer.name} — ${team.name}, ${team.league}. Profile on FootIndex.`,
     image_url: squadPlayer.photo,
     api_football_id: squadPlayer.id,
+    current_team_id: teamId,
   });
 
   assertNoError(inserted.error, `Failed to insert squad player ${squadPlayer.name}`);
@@ -139,12 +148,20 @@ async function importTeamSquad(
     };
   }
 
+  const teamId = await ensureTeamByApiRef({
+    apiId: squad.team.id,
+    name: squad.team.name,
+    logo: squad.team.logo,
+    countryName: team.country,
+    teamType: "club",
+  });
+
   let created = 0;
   let skipped = 0;
   let synced = 0;
 
   for (const squadPlayer of squad.players) {
-    const outcome = await importSquadPlayer(squadPlayer, team);
+    const outcome = await importSquadPlayer(squadPlayer, team, teamId);
     if (outcome === "created") {
       created += 1;
     } else {

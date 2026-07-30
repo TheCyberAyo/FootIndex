@@ -60,8 +60,92 @@ async function searchPlayersFromSupabase(
   return ((result.data ?? []) as SearchPlayersRow[]).map(mapSearchRow);
 }
 
+interface PlayerSelectRow {
+  id: string;
+  slug: string;
+  name: string;
+  short_name: string;
+  date_of_birth: string;
+  nationality: string;
+  position: PlayerSearchResult["position"];
+  image_url: string | null;
+  current_team:
+    | { name: string; logo_url: string | null }
+    | { name: string; logo_url: string | null }[]
+    | null;
+}
+
+function mapPlayerSelectRow(
+  row: PlayerSelectRow,
+  competitions: Map<string, string>,
+): PlayerSearchResult {
+  const team = Array.isArray(row.current_team)
+    ? row.current_team[0]
+    : row.current_team;
+
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    shortName: row.short_name,
+    age: getPlayerAge(row.date_of_birth),
+    nationality: row.nationality,
+    position: row.position,
+    positionLabel: formatPosition(row.position),
+    imageUrl: row.image_url,
+    clubName: team?.name ?? null,
+    clubLogoUrl: team?.logo_url ?? null,
+    competition: competitions.get(row.id) ?? null,
+    href: playerPath(row.slug),
+  };
+}
+
 /**
- * Player search — Supabase FTS + local seed fallback (PROJECT_SPEC §43).
+ * Direct ilike fallback when search_players RPC is missing or failing.
+ * Queries the full players table — not limited to local seed.
+ */
+async function searchPlayersIlike(
+  query: string,
+  limit: number,
+): Promise<PlayerSearchResult[]> {
+  const supabase = createSupabasePublicClient();
+  const sanitized = query.trim().replace(/[%_]/g, "");
+  if (sanitized.length < MIN_QUERY_LENGTH) {
+    return [];
+  }
+
+  const pattern = `%${sanitized.replace(/"/g, "")}%`;
+  const filter = [
+    `name.ilike."${pattern}"`,
+    `short_name.ilike."${pattern}"`,
+    `slug.ilike."${pattern}"`,
+    `nationality.ilike."${pattern}"`,
+  ].join(",");
+
+  const result = await supabase
+    .from("players")
+    .select(
+      "id, slug, name, short_name, date_of_birth, nationality, position, image_url, current_team:teams!players_current_team_id_fkey(name, logo_url)",
+    )
+    .or(filter)
+    .order("name", { ascending: true })
+    .limit(limit);
+
+  assertNoError(result.error, "Failed to search players");
+
+  const rows = (result.data ?? []) as PlayerSelectRow[];
+  let competitions = new Map<string, string>();
+  try {
+    competitions = await fetchLatestCompetitions(rows.map((row) => row.id));
+  } catch {
+    // Club/competition enrichment is optional for search suggestions.
+  }
+
+  return rows.map((row) => mapPlayerSelectRow(row, competitions));
+}
+
+/**
+ * Player search — Supabase FTS → ilike fallback → local seed (PROJECT_SPEC §43).
  */
 export async function searchPlayers(
   query: string,
@@ -79,9 +163,17 @@ export async function searchPlayers(
   }
 
   try {
-    return await searchPlayersFromSupabase(normalized, boundedLimit);
+    const rpcResults = await searchPlayersFromSupabase(normalized, boundedLimit);
+    if (rpcResults.length > 0) {
+      return rpcResults;
+    }
+    return await searchPlayersIlike(normalized, boundedLimit);
   } catch {
-    return searchLocalPlayers(normalized, boundedLimit);
+    try {
+      return await searchPlayersIlike(normalized, boundedLimit);
+    } catch {
+      return searchLocalPlayers(normalized, boundedLimit);
+    }
   }
 }
 

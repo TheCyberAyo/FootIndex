@@ -128,6 +128,35 @@ async function fetchPlayerProfileFromSupabase(
   };
 }
 
+const SUPABASE_PAGE_SIZE = 1000;
+
+async function fetchAllPlayersFromSupabase(): Promise<Player[]> {
+  const supabase = createSupabasePublicClient();
+  const rows: PlayerWithTeam[] = [];
+  let from = 0;
+
+  while (true) {
+    const result = await supabase
+      .from("players")
+      .select("*, current_team:teams!players_current_team_id_fkey(*)")
+      .order("name", { ascending: true })
+      .range(from, from + SUPABASE_PAGE_SIZE - 1);
+
+    assertNoError(result.error, "Failed to list players");
+
+    const page = (result.data ?? []) as PlayerWithTeam[];
+    rows.push(...page);
+
+    if (page.length < SUPABASE_PAGE_SIZE) {
+      break;
+    }
+
+    from += SUPABASE_PAGE_SIZE;
+  }
+
+  return rows.map(mapPlayer);
+}
+
 /**
  * Players service — UI talks here, never to Supabase directly (SRP + DIP).
  */
@@ -137,15 +166,7 @@ export async function listPlayers(): Promise<Player[]> {
   }
 
   try {
-    const supabase = createSupabasePublicClient();
-    const result = await supabase
-      .from("players")
-      .select("*, current_team:teams!players_current_team_id_fkey(*)")
-      .order("name", { ascending: true });
-
-    assertNoError(result.error, "Failed to list players");
-
-    return ((result.data ?? []) as PlayerWithTeam[]).map(mapPlayer);
+    return await fetchAllPlayersFromSupabase();
   } catch {
     return localPlayers;
   }

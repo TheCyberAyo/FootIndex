@@ -64,7 +64,7 @@ export function SiteHeader() {
           <AuthMenu />
           <Button
             asChild
-            className="bg-brand text-brand-foreground hover:bg-brand/90"
+            variant="brand"
           >
             <Link href={`${featuredComparePath()}#vote`}>Vote</Link>
           </Button>
@@ -121,7 +121,7 @@ export function SiteHeader() {
               <AuthMenu compact />
               <Button
                 asChild
-                className="bg-brand text-brand-foreground hover:bg-brand/90"
+                variant="brand"
               >
                 <Link href={`${featuredComparePath()}#vote`} onClick={() => setOpen(false)}>
                   Vote

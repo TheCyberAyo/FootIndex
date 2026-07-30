@@ -188,7 +188,7 @@ export function CommentsPanel({
               <Button
                 type="submit"
                 disabled={postMutation.isPending || body.trim().length < 2}
-                className="bg-brand text-brand-foreground hover:bg-brand/90"
+                variant="brand"
               >
                 {data.isAuthenticated ? "Post comment" : "Sign in to comment"}
               </Button>

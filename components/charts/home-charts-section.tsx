@@ -76,7 +76,7 @@ export function HomeChartsSection({
       <div className="mt-6">
         <Button
           asChild
-          className="bg-brand text-brand-foreground hover:bg-brand/90"
+          variant="brand"
         >
           <Link href={`${defaultComparePath()}#charts`}>
             All charts on Compare

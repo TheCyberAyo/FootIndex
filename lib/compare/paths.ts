@@ -25,7 +25,7 @@ export function isValidCompareSlugPair(
   );
 }
 
-/** Year/season compare + community vote remain on the featured rivalry pair. */
+/** Featured rivalry — marketing default; compare features work for all pairs. */
 export function isFeaturedRivalryCompare(
   playerOneSlug: string,
   playerTwoSlug: string,
@@ -50,4 +50,29 @@ export function defaultComparePath(): string {
 export function compareCanonicalPath(slugA: string, slugB: string): string {
   const [playerOne, playerTwo] = [slugA, slugB].sort();
   return comparePath(playerOne, playerTwo);
+}
+
+/**
+ * Build canonical compare URL after swapping one side.
+ * Returns null when the new slug matches an existing side (no-op / invalid).
+ */
+export function replaceComparePlayerPath(
+  currentPlayerOneSlug: string,
+  currentPlayerTwoSlug: string,
+  side: "playerOne" | "playerTwo",
+  newSlug: string,
+): string | null {
+  if (
+    newSlug === currentPlayerOneSlug ||
+    newSlug === currentPlayerTwoSlug
+  ) {
+    return null;
+  }
+
+  const nextOne =
+    side === "playerOne" ? newSlug : currentPlayerOneSlug;
+  const nextTwo =
+    side === "playerTwo" ? newSlug : currentPlayerTwoSlug;
+
+  return compareCanonicalPath(nextOne, nextTwo);
 }

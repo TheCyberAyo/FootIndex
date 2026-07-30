@@ -234,7 +234,7 @@ function PredictionCard({
           type="button"
           disabled={busy}
           onClick={handleSubmit}
-          className="bg-brand text-brand-foreground hover:bg-brand/90"
+          variant="brand"
         >
           {summary.userPrediction ? "Update prediction" : "Lock prediction"}
         </Button>

@@ -30,7 +30,8 @@ function parseRegion(value: string | null): WorldRegion {
  *
  * Query params:
  * - region=all|europe|americas|africa|asia|oceania
- * - offset=0 (skip first N teams — use with maxTeams for batched imports)
+ * - offset=0 (skip first N teams — use with maxTeams for batched imports;
+ *   expansion clubs start at WORLD_TEAM_EXPANSION_OFFSET in lib/data/world-teams.ts)
  * - maxTeams=10 (optional cap)
  * - sync=true (optional — 1 API call per player; expensive on free plan)
  * - delayMs=350 (pause between team squad fetches)

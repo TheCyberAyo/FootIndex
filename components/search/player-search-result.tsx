@@ -9,6 +9,7 @@ interface PlayerSearchResultItemProps {
   result: PlayerSearchResult;
   active?: boolean;
   onSelect?: () => void;
+  onPick?: (result: PlayerSearchResult) => void;
   className?: string;
 }
 
@@ -19,22 +20,11 @@ export function PlayerSearchResultItem({
   result,
   active = false,
   onSelect,
+  onPick,
   className,
 }: PlayerSearchResultItemProps) {
-  return (
-    <Link
-      href={result.href}
-      onClick={onSelect}
-      className={cn(
-        "flex items-center gap-3 rounded-xl px-3 py-3 transition-colors",
-        active
-          ? "bg-brand/15 text-foreground"
-          : "text-foreground/90 hover:bg-white/5",
-        className,
-      )}
-      role="option"
-      aria-selected={active}
-    >
+  const content = (
+    <>
       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-white/10">
         {result.imageUrl ? (
           <Image
@@ -66,6 +56,43 @@ export function PlayerSearchResultItem({
         </Badge>
         <span className="text-xs text-foreground/50">Age {result.age}</span>
       </div>
+    </>
+  );
+
+  const itemClassName = cn(
+    "flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors",
+    active
+      ? "bg-brand/15 text-foreground"
+      : "text-foreground/90 hover:bg-white/5",
+    className,
+  );
+
+  if (onPick) {
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          onPick(result);
+          onSelect?.();
+        }}
+        className={itemClassName}
+        role="option"
+        aria-selected={active}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link
+      href={result.href}
+      onClick={onSelect}
+      className={itemClassName}
+      role="option"
+      aria-selected={active}
+    >
+      {content}
     </Link>
   );
 }
@@ -74,6 +101,7 @@ interface PlayerSearchResultsListProps {
   results: PlayerSearchResult[];
   activeIndex?: number;
   onSelect?: () => void;
+  onPick?: (result: PlayerSearchResult) => void;
   emptyMessage?: string;
   className?: string;
 }
@@ -82,6 +110,7 @@ export function PlayerSearchResultsList({
   results,
   activeIndex = -1,
   onSelect,
+  onPick,
   emptyMessage = "No players found.",
   className,
 }: PlayerSearchResultsListProps) {
@@ -101,6 +130,7 @@ export function PlayerSearchResultsList({
             result={result}
             active={index === activeIndex}
             onSelect={onSelect}
+            onPick={onPick}
           />
         </li>
       ))}

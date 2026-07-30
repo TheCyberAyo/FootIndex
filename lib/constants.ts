@@ -20,8 +20,10 @@ export const SITE_KEYWORDS = [
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-/** Manchester City FC sky blue — site brand accent (matches `--brand` in CSS). */
-export const BRAND_COLOR = "#6CABDD";
+import { designTokens } from "@/lib/design-tokens";
+
+/** Manchester City FC sky blue — matches `--brand` in CSS. */
+export const BRAND_COLOR = designTokens.brand;
 
 /** Public contact address (mailto on /contact). Override via env in production. */
 export const SITE_CONTACT_EMAIL =

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { EmptyState } from "@/components/shared/empty-state";
 import { GlassCard } from "@/components/shared/glass-card";
 import { formatPosition } from "@/lib/players/format";
 import { playerPath } from "@/lib/players/paths";
@@ -16,6 +17,10 @@ export function RankingTable({
   metricLabel,
   emptyMessage = "No players match this ranking yet.",
 }: RankingTableProps) {
+  if (entries.length === 0) {
+    return <EmptyState title="No rankings yet" description={emptyMessage} />;
+  }
+
   return (
     <GlassCard className="overflow-hidden">
       <div className="overflow-x-auto">
@@ -30,14 +35,7 @@ export function RankingTable({
             </tr>
           </thead>
           <tbody>
-            {entries.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-5 py-6 text-foreground/50">
-                  {emptyMessage}
-                </td>
-              </tr>
-            ) : (
-              entries.map((entry) => (
+            {entries.map((entry) => (
                 <tr
                   key={entry.player.id}
                   className="border-t border-border/60 text-foreground/80"
@@ -63,8 +61,7 @@ export function RankingTable({
                     {entry.valueLabel}
                   </td>
                 </tr>
-              ))
-            )}
+              ))}
           </tbody>
         </table>
       </div>

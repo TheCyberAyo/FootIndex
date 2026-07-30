@@ -31,7 +31,7 @@ export function FeaturedRivalrySection({
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button
             asChild
-            className="bg-brand text-brand-foreground hover:bg-brand/90"
+            variant="brand"
           >
             <Link href={featuredComparePath()}>Full comparison</Link>
           </Button>

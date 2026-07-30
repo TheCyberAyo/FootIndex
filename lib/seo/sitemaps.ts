@@ -1,8 +1,13 @@
-import { comparePath, defaultComparePath } from "@/lib/compare/paths";
+import { defaultComparePath } from "@/lib/compare/paths";
 import { competitionPath } from "@/lib/competitions/paths";
 import { CURATED_NEWS } from "@/lib/data/news";
 import { playerPath } from "@/lib/players/paths";
 import { RANKING_CATEGORIES } from "@/lib/rankings/categories";
+import {
+  comparePairPriority,
+  comparePairToPath,
+  listPrerenderComparePairs,
+} from "@/lib/seo/prerender";
 import { teamPath } from "@/lib/teams/paths";
 import { listCompetitions } from "@/services/competitions/competitions.service";
 import { listPlayers, listTeams } from "@/services";
@@ -37,25 +42,18 @@ export async function listPlayerSitemapEntries(): Promise<SitemapEntry[]> {
 }
 
 /**
- * One canonical compare URL per unordered pair (lexicographic slug order).
- * PROJECT_SPECIFICATION §87 — Comparison Sitemap.
+ * Curated compare URLs for SEO — marquee pairs only, not full N² catalog.
+ * All other pairs remain live via dynamic routes + internal links.
+ * PROJECT_SPECIFICATION §87 — Comparison Sitemap (split when exceeding limits).
  */
 export async function listCompareSitemapEntries(): Promise<SitemapEntry[]> {
-  const players = await listPlayers();
-  const entries: SitemapEntry[] = [];
+  const pairs = await listPrerenderComparePairs();
 
-  for (let i = 0; i < players.length; i += 1) {
-    for (let j = i + 1; j < players.length; j += 1) {
-      const [playerOne, playerTwo] = [players[i].slug, players[j].slug].sort();
-      entries.push({
-        path: comparePath(playerOne, playerTwo),
-        changeFrequency: "weekly",
-        priority: playerOne === "haaland" && playerTwo === "mbappe" ? 0.9 : 0.75,
-      });
-    }
-  }
-
-  return entries;
+  return pairs.map((pair) => ({
+    path: comparePairToPath(pair),
+    changeFrequency: "weekly" as const,
+    priority: comparePairPriority(pair.playerOne, pair.playerTwo),
+  }));
 }
 
 export function listNewsSitemapEntries(): SitemapEntry[] {

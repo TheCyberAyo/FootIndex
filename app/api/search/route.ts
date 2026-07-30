@@ -15,25 +15,31 @@ const querySchema = z.object({
  * Player search API — Supabase FTS, never Football API (PROJECT_SPEC §43).
  */
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const parsed = querySchema.safeParse({
-    q: searchParams.get("q") ?? "",
-    limit: searchParams.get("limit") ?? undefined,
-  });
+  try {
+    const { searchParams } = new URL(request.url);
+    const parsed = querySchema.safeParse({
+      q: searchParams.get("q") ?? "",
+      limit: searchParams.get("limit") ?? undefined,
+    });
 
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Query must be at least 2 characters.", results: [] },
-      { status: 400 },
-    );
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Query must be at least 2 characters.", results: [] },
+        { status: 400 },
+      );
+    }
+
+    const results = await searchPlayers(parsed.data.q, parsed.data.limit);
+
+    return NextResponse.json({
+      dataSource: isSupabaseConfigured() ? "supabase" : "local-seed",
+      query: parsed.data.q,
+      count: results.length,
+      results,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Player search failed";
+    return NextResponse.json({ error: message, results: [] }, { status: 500 });
   }
-
-  const results = await searchPlayers(parsed.data.q, parsed.data.limit);
-
-  return NextResponse.json({
-    dataSource: isSupabaseConfigured() ? "supabase" : "local-seed",
-    query: parsed.data.q,
-    count: results.length,
-    results,
-  });
 }

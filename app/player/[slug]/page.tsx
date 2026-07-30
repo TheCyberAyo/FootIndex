@@ -6,7 +6,7 @@ import {
 } from "@/components/players/player-route-page";
 import { isValidPlayerSlugFormat } from "@/lib/players/paths";
 import { createPageMetadata } from "@/lib/seo";
-import { listPlayers } from "@/services";
+import { listPrerenderPlayerSlugs } from "@/lib/seo/prerender";
 
 export const revalidate = 60;
 export const dynamicParams = true;
@@ -15,9 +15,10 @@ interface PlayerSlugPageProps {
   params: Promise<{ slug: string }>;
 }
 
+/** Pre-render featured + marquee players — full catalog via dynamicParams + player sitemap. */
 export async function generateStaticParams() {
-  const players = await listPlayers();
-  return players.map((player) => ({ slug: player.slug }));
+  const slugs = await listPrerenderPlayerSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PlayerSlugPageProps) {

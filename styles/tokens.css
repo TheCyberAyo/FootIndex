@@ -1,0 +1,151 @@
+/**
+ * FootIndex design tokens — Part 7.
+ * Single source for semantic colours, surfaces, typography, shadows, and motion.
+ * JS contexts (charts, OG) mirror values in lib/design-tokens.ts.
+ */
+
+:root {
+  /* Semantic status */
+  --success: #22c55e;
+  --success-foreground: #052e16;
+  --warning: #f5c518;
+  --warning-foreground: #1a1400;
+  --error: oklch(0.577 0.245 27.325);
+  --error-foreground: #ffffff;
+  --info: var(--brand);
+  --info-foreground: var(--brand-foreground);
+
+  /* Layered surfaces (dark-first; light inherits via :root in globals.css) */
+  --surface-base: var(--background);
+  --surface-raised: var(--surface-elevated);
+  --surface-card: var(--glass);
+  --surface-modal: rgb(10 10 10 / 0.96);
+  --surface-nav: rgb(0 0 0 / 0.85);
+  --surface-footer: var(--surface-elevated);
+
+  /* Text aliases */
+  --text-primary: var(--foreground);
+  --text-secondary: color-mix(in srgb, var(--foreground) 72%, transparent);
+  --text-muted: var(--muted-foreground);
+  --text-disabled: color-mix(in srgb, var(--foreground) 35%, transparent);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.24);
+  --shadow-md: 0 4px 16px rgb(0 0 0 / 0.28);
+  --shadow-lg: 0 12px 40px rgb(0 0 0 / 0.36);
+  --shadow-overlay: 0 24px 64px rgb(0 0 0 / 0.5);
+
+  /* Typography scale (rem) — use utilities text-display, text-stat, etc. */
+  --text-display-size: 3rem;
+  --text-display-leading: 1.05;
+  --text-h1-size: 2.25rem;
+  --text-h1-leading: 1.1;
+  --text-h2-size: 1.875rem;
+  --text-h2-leading: 1.15;
+  --text-h3-size: 1.5rem;
+  --text-h3-leading: 1.2;
+  --text-subtitle-size: 1.125rem;
+  --text-subtitle-leading: 1.35;
+  --text-body-size: 1rem;
+  --text-body-leading: 1.5;
+  --text-body-sm-size: 0.875rem;
+  --text-body-sm-leading: 1.45;
+  --text-caption-size: 0.75rem;
+  --text-caption-leading: 1.35;
+  --text-stat-size: 2rem;
+  --text-stat-leading: 1;
+
+  /* Chart series (player one = light, player two = brand) */
+  --chart-player-one: #ffffff;
+  --chart-player-two: var(--brand);
+  --chart-grid: rgb(255 255 255 / 0.12);
+  --chart-axis: rgb(255 255 255 / 0.45);
+  --chart-tooltip-bg: rgb(10 10 10 / 0.92);
+  --chart-tooltip-border: rgb(255 255 255 / 0.12);
+  --chart-muted: rgb(255 255 255 / 0.35);
+}
+
+.dark {
+  --surface-modal: rgb(10 10 10 / 0.96);
+  --surface-nav: rgb(0 0 0 / 0.85);
+}
+
+@theme inline {
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-surface-base: var(--surface-base);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-card: var(--surface-card);
+  --color-surface-modal: var(--surface-modal);
+  --color-surface-nav: var(--surface-nav);
+  --color-surface-footer: var(--surface-footer);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-overlay: var(--shadow-overlay);
+}
+
+@layer utilities {
+  .text-display {
+    font-family: var(--font-display);
+    font-size: var(--text-display-size);
+    line-height: var(--text-display-leading);
+    font-weight: 800;
+  }
+
+  .text-h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-h1-size);
+    line-height: var(--text-h1-leading);
+    font-weight: 700;
+  }
+
+  .text-h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-h2-size);
+    line-height: var(--text-h2-leading);
+    font-weight: 700;
+  }
+
+  .text-h3 {
+    font-family: var(--font-display);
+    font-size: var(--text-h3-size);
+    line-height: var(--text-h3-leading);
+    font-weight: 700;
+  }
+
+  .text-subtitle {
+    font-size: var(--text-subtitle-size);
+    line-height: var(--text-subtitle-leading);
+    font-weight: 500;
+  }
+
+  .text-body {
+    font-size: var(--text-body-size);
+    line-height: var(--text-body-leading);
+  }
+
+  .text-body-sm {
+    font-size: var(--text-body-sm-size);
+    line-height: var(--text-body-sm-leading);
+  }
+
+  .text-caption {
+    font-size: var(--text-caption-size);
+    line-height: var(--text-caption-leading);
+    letter-spacing: 0.02em;
+  }
+
+  .text-stat {
+    font-family: var(--font-display);
+    font-size: var(--text-stat-size);
+    line-height: var(--text-stat-leading);
+    font-weight: 800;
+  }
+}

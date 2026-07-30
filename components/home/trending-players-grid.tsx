@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 
+import { EmptyState } from "@/components/shared/empty-state";
 import { GlassCard } from "@/components/shared/glass-card";
 import type { PlayerSearchResult } from "@/types/domain";
 
@@ -11,11 +12,10 @@ interface TrendingPlayersGridProps {
 export function TrendingPlayersGrid({ players }: TrendingPlayersGridProps) {
   if (players.length === 0) {
     return (
-      <GlassCard className="p-6 text-foreground/60">
-        No players in the database yet. Run{" "}
-        <code className="text-brand">POST /api/players/world</code> to import
-        squads globally, then sync stats.
-      </GlassCard>
+      <EmptyState
+        title="No players yet"
+        description="Import squads globally, then sync stats to populate the database."
+      />
     );
   }
 

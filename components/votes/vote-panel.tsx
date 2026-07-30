@@ -207,7 +207,7 @@ export function VotePanel({
               <Button
                 type="button"
                 onClick={() => setAuthOpen(true)}
-                className="bg-brand text-brand-foreground hover:bg-brand/90"
+                variant="brand"
               >
                 Sign in to vote
               </Button>

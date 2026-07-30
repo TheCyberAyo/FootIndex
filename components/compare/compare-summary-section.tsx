@@ -27,7 +27,7 @@ export function CompareSummarySection({
       description="Auto-generated from synced career stats — not an AI opinion piece."
     >
       <GlassCard className="p-5 sm:p-6">
-        <p className="text-sm leading-relaxed text-white/75 sm:text-base">
+        <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
           {summary}
         </p>
       </GlassCard>

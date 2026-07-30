@@ -2,16 +2,17 @@
 
 Current Phase
 
-Part 1
+Part 7
 
 Objective
 
-Implement dynamic player routing.
+Design system — tokens, shared UI primitives, and visual consistency.
 
 Requirements
 
-- Follow PROJECT_SPECIFICATION.md.
-- Reuse existing components.
-- No hardcoded players.
-- Preserve current UI.
+- Follow PROJECT_SPECIFICATION.md §167–§200.
+- Centralise design tokens (colours, typography, surfaces, shadows).
+- Reusable EmptyState, ErrorState, LoadingSkeleton, StatCard.
+- Button `brand` variant + loading state.
+- Migrate high-traffic components to semantic tokens.
 - Stop after completion.

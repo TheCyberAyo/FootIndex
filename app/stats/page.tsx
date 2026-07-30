@@ -240,7 +240,7 @@ export default async function StatsPage() {
         <div className="mt-6">
           <Button
             asChild
-            className="bg-brand text-brand-foreground hover:bg-brand/90"
+            variant="brand"
           >
             <Link href="/compare#charts">Open full comparison</Link>
           </Button>

@@ -1,5 +1,6 @@
 import { PlayerSearch } from "@/components/search/player-search";
 import { PlayerSearchResultsList } from "@/components/search/player-search-result";
+import { EmptyState } from "@/components/shared/empty-state";
 import { GlassCard } from "@/components/shared/glass-card";
 import { Section } from "@/components/shared/section";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -66,12 +67,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               : `${results.length} players found`
           }
         >
-          <GlassCard className="overflow-hidden p-2">
-            <PlayerSearchResultsList
-              results={results}
-              emptyMessage={`No players found for “${query}”. Try a different name, club, or nationality.`}
+          {results.length === 0 ? (
+            <EmptyState
+              title="No players found"
+              description={`No players found for “${query}”. Try a different name, club, or nationality.`}
             />
-          </GlassCard>
+          ) : (
+            <GlassCard className="overflow-hidden p-2">
+              <PlayerSearchResultsList results={results} />
+            </GlassCard>
+          )}
         </Section>
       ) : null}
     </>

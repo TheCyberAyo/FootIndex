@@ -79,7 +79,7 @@ export default function ContactPage() {
           <div className="mt-4">
             <Button
               asChild
-              className="bg-brand text-brand-foreground hover:bg-brand/90"
+              variant="brand"
             >
               <a href={mailtoHref("General inquiry")}>Open mail app</a>
             </Button>
