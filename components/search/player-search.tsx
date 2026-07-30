@@ -12,7 +12,9 @@ import {
   type KeyboardEvent,
 } from "react";
 
+import { recordSearchClick } from "@/lib/search/session";
 import { PlayerSearchResultsList } from "@/components/search/player-search-result";
+import { RecentSearches } from "@/components/search/recent-searches";
 import { Input } from "@/components/ui/input";
 import { usePlayerSearch } from "@/hooks/use-player-search";
 import { cn } from "@/lib/utils";
@@ -94,9 +96,13 @@ export function PlayerSearch({
   const navigateToResult = useCallback(
     (result: PlayerSearchResult) => {
       close();
+      void recordSearchClick({
+        searchTerm: query.trim() || result.name,
+        playerId: result.id,
+      });
       router.push(result.href);
     },
-    [close, router],
+    [close, query, router],
   );
 
   const handleSubmit = (event: FormEvent) => {
@@ -243,6 +249,16 @@ export function PlayerSearch({
             />
           )}
         </div>
+      ) : null}
+
+      {variant === "page" ? (
+        <RecentSearches
+          onSelect={(term) => {
+            setQuery(term);
+            setOpen(true);
+            inputRef.current?.focus();
+          }}
+        />
       ) : null}
     </div>
   );

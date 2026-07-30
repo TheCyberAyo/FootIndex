@@ -1,3 +1,4 @@
+import { FEATURED_RIVALRY } from "@/lib/brand/featured-rivalry";
 import {
   buildLocalPlayerProfile,
   localPlayers,
@@ -5,6 +6,7 @@ import {
 import { isSupabaseConfigured } from "@/lib/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import { assertNoError, ServiceError } from "@/services/errors";
+import { listTransfersByPlayerId } from "@/services/players/transfers.service";
 import type {
   AwardRow,
   CareerStatRow,
@@ -76,7 +78,7 @@ async function fetchPlayerProfileFromSupabase(
 
   const player = mapPlayer(playerResult.data as PlayerWithTeam);
 
-  const [careerResult, seasonsResult, awardsResult, trophiesResult] =
+  const [careerResult, seasonsResult, awardsResult, trophiesResult, transfers] =
     await Promise.all([
       supabase
         .from("career_stats")
@@ -98,6 +100,7 @@ async function fetchPlayerProfileFromSupabase(
         .select("*, team:teams(*)")
         .eq("player_id", player.id)
         .order("year", { ascending: false }),
+      listTransfersByPlayerId(player.id),
     ]);
 
   assertNoError(careerResult.error, "Failed to load career stats");
@@ -121,6 +124,7 @@ async function fetchPlayerProfileFromSupabase(
     seasons: seasons.map(mapSeason),
     awards,
     trophies: trophies.map(mapTrophy),
+    transfers,
   };
 }
 
@@ -167,21 +171,30 @@ export async function getPlayerProfileBySlug(
   }
 }
 
-export async function getComparisonProfiles(): Promise<{
-  haaland: PlayerProfile;
-  mbappe: PlayerProfile;
+export async function getFeaturedRivalryProfiles(): Promise<{
+  playerOne: PlayerProfile;
+  playerTwo: PlayerProfile;
 }> {
-  const [haaland, mbappe] = await Promise.all([
-    getPlayerProfileBySlug("haaland"),
-    getPlayerProfileBySlug("mbappe"),
+  const [playerOne, playerTwo] = await Promise.all([
+    getPlayerProfileBySlug(FEATURED_RIVALRY.playerOneSlug),
+    getPlayerProfileBySlug(FEATURED_RIVALRY.playerTwoSlug),
   ]);
 
-  if (!haaland || !mbappe) {
+  if (!playerOne || !playerTwo) {
     throw new ServiceError(
-      "Comparison requires both Haaland and Mbappé profiles.",
+      "Featured comparison requires both rivalry profiles.",
       "MISSING_PLAYER",
     );
   }
 
-  return { haaland, mbappe };
+  return { playerOne, playerTwo };
+}
+
+/** @deprecated Use getFeaturedRivalryProfiles */
+export async function getComparisonProfiles(): Promise<{
+  haaland: PlayerProfile;
+  mbappe: PlayerProfile;
+}> {
+  const { playerOne, playerTwo } = await getFeaturedRivalryProfiles();
+  return { haaland: playerOne, mbappe: playerTwo };
 }

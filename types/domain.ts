@@ -45,6 +45,7 @@ export interface PlayerProfile {
   seasons: SeasonStats[];
   awards: Award[];
   trophies: Trophy[];
+  transfers: PlayerTransfer[];
 }
 
 /** Search autocomplete / results card (PROJECT_SPECIFICATION §56). */
@@ -79,6 +80,7 @@ export interface RankingEntry {
 export interface CompetitionSummary {
   slug: string;
   name: string;
+  logoUrl?: string | null;
 }
 
 export interface CompetitionPlayerRow {
@@ -148,6 +150,15 @@ export interface LiveScoreCard {
   match: Match;
   playerStats: PlayerMatchStats | null;
   playerSlug: string | null;
+}
+
+export interface PlayerTransfer {
+  id: string;
+  transferDate: string;
+  transferType: string | null;
+  feeText: string | null;
+  fromTeam: Team | null;
+  toTeam: Team | null;
 }
 
 export interface PlayerIdentity {

@@ -8,7 +8,7 @@ import {
 } from "@/services/sync/sync.service";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 function parseJob(value: string | null): SyncJob {
   if (value === "players" || value === "fixtures" || value === "all") {
@@ -17,10 +17,19 @@ function parseJob(value: string | null): SyncJob {
   return "all";
 }
 
+function parseOptionalInt(value: string | null): number | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 /**
  * Protected sync endpoint.
  * Auth: Authorization: Bearer $CRON_SECRET
  * Jobs: ?job=players|fixtures|all
+ * Batching: ?offset=0&limit=25&delayMs=600 (alphabetical by slug)
  *
  * Decision: never expose API-Football key to the browser; Vercel Cron + manual
  * admin calls hit this route only.
@@ -30,7 +39,11 @@ export async function POST(request: Request) {
     assertCronAuthorized(request.headers.get("authorization"));
     const { searchParams } = new URL(request.url);
     const job = parseJob(searchParams.get("job"));
-    const result = await runSyncJob(job);
+    const result = await runSyncJob(job, {
+      offset: parseOptionalInt(searchParams.get("offset")),
+      limit: parseOptionalInt(searchParams.get("limit")),
+      delayMs: parseOptionalInt(searchParams.get("delayMs")),
+    });
 
     return NextResponse.json({
       ...result,

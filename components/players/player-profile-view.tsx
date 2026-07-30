@@ -4,7 +4,10 @@ import { PlayerChartsSection } from "@/components/charts/player-charts-section";
 import { CommentsSection } from "@/components/comments/comments-section";
 import { PlayerAchievements } from "@/components/players/player-achievements";
 import { PlayerBio } from "@/components/players/player-bio";
+import { PlayerClubHistory } from "@/components/players/player-club-history";
 import { PlayerHero } from "@/components/players/player-hero";
+import { PlayerInternationalCareer } from "@/components/players/player-international-career";
+import { PlayerRecords } from "@/components/players/player-records";
 import { PlayerSeasonTable } from "@/components/players/player-season-table";
 import { PlayerStatsGrid } from "@/components/players/player-stats-grid";
 import { PlayerTimeline } from "@/components/players/player-timeline";
@@ -39,6 +42,7 @@ export function PlayerProfileView({
     trophies: profile.trophies,
     awards: profile.awards,
     seasons: profile.seasons,
+    transfers: profile.transfers,
   });
 
   return (
@@ -46,10 +50,23 @@ export function PlayerProfileView({
       <PlayerHero profile={profile} />
       <PlayerBio profile={profile} />
       <PlayerStatsGrid career={profile.career} />
+      <PlayerClubHistory
+        seasons={profile.seasons}
+        trophies={profile.trophies}
+      />
+      <PlayerInternationalCareer
+        seasons={profile.seasons}
+        nationality={profile.player.nationality}
+      />
       <PlayerSeasonTable seasons={profile.seasons} />
       <PlayerAchievements
         trophies={profile.trophies}
         awards={profile.awards}
+      />
+      <PlayerRecords
+        player={profile.player}
+        career={profile.career}
+        seasons={profile.seasons}
       />
       <PlayerTimeline events={timeline} />
       <PlayerChartsSection profile={profile} rival={rival ?? undefined} />

@@ -7,26 +7,32 @@ import { CompareMetricRow } from "@/components/compare/compare-metric-row";
 import { Section } from "@/components/shared/section";
 import { Button } from "@/components/ui/button";
 import {
-  buildInternationalYearMetrics,
-  buildSeasonCompareMetrics,
-  formatSeasonClub,
-  getSeasonRow,
-  resolveSeasonKey,
-  searchYearCompare,
-  SEASON_COMPARE_ROWS,
-} from "@/lib/compare/by-year";
-import { SEASON_BASELINE_AS_OF } from "@/lib/data/season-baselines";
+  buildDynamicInternationalYearMetrics,
+  buildDynamicSeasonCompareMetrics,
+  buildDynamicSeasonRows,
+  buildSeasonCompareShareUrl,
+  formatDynamicSeasonClub,
+  resolveDynamicSeasonKey,
+  searchDynamicYearCompare,
+} from "@/lib/compare/season-compare";
 import { cn } from "@/lib/utils";
+import type { PlayerProfile } from "@/types/domain";
 
 interface YearCompareSectionProps {
+  playerOne: PlayerProfile;
+  playerTwo: PlayerProfile;
+  comparePath: string;
   initialSeason?: string | null;
   initialYear?: string | null;
 }
 
 /**
- * Searchable season / calendar-year compare — curated baselines (Free plan).
+ * Searchable season / calendar-year compare from synced season_stats for any pair.
  */
 export function YearCompareSection({
+  playerOne,
+  playerTwo,
+  comparePath,
   initialSeason = null,
   initialYear = null,
 }: YearCompareSectionProps) {
@@ -34,20 +40,37 @@ export function YearCompareSection({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const allRows = buildDynamicSeasonRows(playerOne, playerTwo);
+  const playerOneName = playerOne.player.short_name;
+  const playerTwoName = playerTwo.player.short_name;
+
   const [query, setQuery] = useState(initialYear ?? initialSeason ?? "");
   const deferredQuery = useDeferredValue(query);
   const [selectedSeason, setSelectedSeason] = useState(() =>
-    resolveSeasonKey(initialSeason, initialYear),
+    resolveDynamicSeasonKey(allRows, initialSeason, initialYear),
   );
+  const [copied, setCopied] = useState(false);
 
-  const { seasons, calendarYear, international } =
-    searchYearCompare(deferredQuery);
-  const selectedRow = getSeasonRow(selectedSeason);
+  const { seasons, calendarYear, international } = searchDynamicYearCompare(
+    playerOne,
+    playerTwo,
+    deferredQuery,
+  );
+  const selectedRow =
+    seasons.find((row) => row.season === selectedSeason) ??
+    allRows.find((row) => row.season === selectedSeason) ??
+    null;
   const seasonMetrics = selectedRow
-    ? buildSeasonCompareMetrics(selectedRow)
+    ? buildDynamicSeasonCompareMetrics(selectedRow)
     : [];
   const intlMetrics =
-    calendarYear != null ? buildInternationalYearMetrics(calendarYear) : [];
+    calendarYear != null && international
+      ? buildDynamicInternationalYearMetrics(
+          calendarYear,
+          international.playerOne,
+          international.playerTwo,
+        )
+      : [];
 
   useEffect(() => {
     if (seasons.length === 0) {
@@ -77,6 +100,30 @@ export function YearCompareSection({
     updateUrl(season, query);
   }
 
+  async function copyShareLink() {
+    if (!selectedSeason) {
+      return;
+    }
+    const relative = buildSeasonCompareShareUrl(
+      comparePath,
+      selectedSeason,
+      calendarYear != null ? String(calendarYear) : query,
+    );
+    const url =
+      typeof window !== "undefined"
+        ? `${window.location.origin}${relative}`
+        : relative;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  const seasonTabs = deferredQuery ? seasons : allRows;
+
   return (
     <Section
       id="by-year"
@@ -95,7 +142,7 @@ export function YearCompareSection({
           onChange={(event) => {
             const value = event.target.value;
             setQuery(value);
-            const next = searchYearCompare(value);
+            const next = searchDynamicYearCompare(playerOne, playerTwo, value);
             if (next.seasons[0]) {
               setSelectedSeason(next.seasons[0].season);
               updateUrl(next.seasons[0].season, value);
@@ -104,81 +151,97 @@ export function YearCompareSection({
           placeholder="Search year, season, or club…"
           className="h-11 w-full rounded-xl border border-glass-border bg-glass px-4 text-sm text-white outline-none backdrop-blur-xl placeholder:text-white/35 focus-visible:border-brand/50 focus-visible:ring-2 focus-visible:ring-brand/30 sm:max-w-md"
         />
-        <p className="text-xs text-white/35">
-          {seasons.length} season{seasons.length === 1 ? "" : "s"} · curated{" "}
-          {SEASON_BASELINE_AS_OF}
-        </p>
-      </div>
-
-      <div className="mb-8 flex gap-2 overflow-x-auto pb-1">
-        {(deferredQuery ? seasons : SEASON_COMPARE_ROWS).map((row) => {
-          const active = row.season === selectedSeason;
-          return (
-            <Button
-              key={row.season}
-              type="button"
-              size="sm"
-              variant={active ? "default" : "outline"}
-              onClick={() => selectSeason(row.season)}
-              className={cn(
-                "shrink-0",
-                active && "bg-brand text-black hover:bg-brand/90",
-              )}
-            >
-              {row.season}
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-xs text-white/35">
+            {seasonTabs.length} season{seasonTabs.length === 1 ? "" : "s"} · synced
+            stats
+          </p>
+          {selectedSeason ? (
+            <Button type="button" size="sm" variant="outline" onClick={copyShareLink}>
+              {copied ? "Link copied" : "Share this season"}
             </Button>
-          );
-        })}
+          ) : null}
+        </div>
       </div>
 
-      {seasons.length === 0 ? (
+      {allRows.length === 0 ? (
         <p className="rounded-2xl border border-glass-border bg-glass px-4 py-8 text-center text-sm text-white/50 backdrop-blur-xl">
-          No seasons match “{query}”. Try 2023, 2022-2023, or Dortmund.
+          No season-by-season club data yet for this pair. Sync players from admin
+          to populate season stats.
         </p>
-      ) : selectedRow ? (
-        <div className="space-y-6">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-glass-border bg-glass px-4 py-4 backdrop-blur-xl">
-              <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
-                Haaland · {selectedRow.season}
-              </p>
-              <p className="mt-2 font-display text-lg font-bold text-white">
-                {formatSeasonClub(selectedRow.haaland)}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-glass-border bg-glass px-4 py-4 backdrop-blur-xl">
-              <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
-                Mbappé · {selectedRow.season}
-              </p>
-              <p className="mt-2 font-display text-lg font-bold text-white">
-                {formatSeasonClub(selectedRow.mbappe)}
-              </p>
-            </div>
+      ) : (
+        <>
+          <div className="mb-8 flex gap-2 overflow-x-auto pb-1">
+            {seasonTabs.map((row) => {
+              const active = row.season === selectedSeason;
+              return (
+                <Button
+                  key={row.season}
+                  type="button"
+                  size="sm"
+                  variant={active ? "default" : "outline"}
+                  onClick={() => selectSeason(row.season)}
+                  className={cn(
+                    "shrink-0",
+                    active && "bg-brand text-black hover:bg-brand/90",
+                  )}
+                >
+                  {row.season}
+                </Button>
+              );
+            })}
           </div>
 
-          <div className="space-y-3">
-            {seasonMetrics.map((metric) => (
-              <CompareMetricRow key={metric.key} metric={metric} />
-            ))}
-          </div>
-
-          {calendarYear != null && international ? (
-            <div className="space-y-3">
-              <p className="text-xs tracking-[0.18em] text-brand uppercase">
-                Country · calendar {calendarYear}
-              </p>
-              {intlMetrics.map((metric) => (
-                <CompareMetricRow key={metric.key} metric={metric} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-xs text-white/35">
-              Tip: search a calendar year (e.g. 2023) to compare international
-              goals for that year.
+          {seasons.length === 0 ? (
+            <p className="rounded-2xl border border-glass-border bg-glass px-4 py-8 text-center text-sm text-white/50 backdrop-blur-xl">
+              No seasons match “{query}”. Try a year, season label, or club name.
             </p>
-          )}
-        </div>
-      ) : null}
+          ) : selectedRow ? (
+            <div className="space-y-6">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-glass-border bg-glass px-4 py-4 backdrop-blur-xl">
+                  <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
+                    {playerOneName} · {selectedRow.season}
+                  </p>
+                  <p className="mt-2 font-display text-lg font-bold text-white">
+                    {formatDynamicSeasonClub(selectedRow.playerOne)}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-glass-border bg-glass px-4 py-4 backdrop-blur-xl">
+                  <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
+                    {playerTwoName} · {selectedRow.season}
+                  </p>
+                  <p className="mt-2 font-display text-lg font-bold text-white">
+                    {formatDynamicSeasonClub(selectedRow.playerTwo)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {seasonMetrics.map((metric) => (
+                  <CompareMetricRow key={metric.key} metric={metric} />
+                ))}
+              </div>
+
+              {calendarYear != null && international ? (
+                <div className="space-y-3">
+                  <p className="text-xs tracking-[0.18em] text-brand uppercase">
+                    Country · calendar {calendarYear}
+                  </p>
+                  {intlMetrics.map((metric) => (
+                    <CompareMetricRow key={metric.key} metric={metric} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-xs text-white/35">
+                  Tip: search a calendar year (e.g. 2023) to compare international
+                  goals for that year.
+                </p>
+              )}
+            </div>
+          ) : null}
+        </>
+      )}
     </Section>
   );
 }

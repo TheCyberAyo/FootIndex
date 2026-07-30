@@ -2,6 +2,7 @@ import { GlassCard } from "@/components/shared/glass-card";
 import { PageHeader } from "@/components/shared/page-header";
 import { Section } from "@/components/shared/section";
 import { JsonLd } from "@/components/seo/json-ld";
+import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/constants";
 import { createPageMetadata } from "@/lib/seo";
 import {
   ABOUT_FAQ,
@@ -12,8 +13,7 @@ import {
 
 export const metadata = createPageMetadata({
   title: "About",
-  description:
-    "About Haaland vs Mbappé — compare Erling Haaland and Kylian Mbappé career achievements for club and country with goals, trophies, and season stats.",
+  description: `About ${SITE_NAME} — ${SITE_DESCRIPTION}`,
   path: "/about",
 });
 
@@ -23,9 +23,8 @@ export default function AboutPage() {
       <JsonLd
         data={[
           createWebPageJsonLd({
-            title: "About Haaland vs Mbappé",
-            description:
-              "About Haaland vs Mbappé — compare Erling Haaland and Kylian Mbappé career achievements for club and country.",
+            title: `About ${SITE_NAME}`,
+            description: SITE_DESCRIPTION,
             path: "/about",
           }),
           createBreadcrumbJsonLd([
@@ -37,12 +36,12 @@ export default function AboutPage() {
       />
       <PageHeader
         eyebrow="Project"
-        title="About"
-        description="A production-ready stats product: clean architecture, Supabase-backed data, and API-Football live feeds."
+        title="About FootIndex"
+        description="A football player search engine — profiles, comparisons, rankings, and synced stats with modern UX and SEO."
       />
       <Section
-        title="Built for the debate"
-        description="Next.js 15, TypeScript, Tailwind, Supabase, and Recharts — with SEO and Core Web Vitals treated as product features."
+        title="Platform"
+        description="Next.js 15, TypeScript, Tailwind, Supabase, and Recharts — built to scale from a featured rivalry to a full player database."
       >
         <ul className="grid gap-4 sm:grid-cols-2">
           {[

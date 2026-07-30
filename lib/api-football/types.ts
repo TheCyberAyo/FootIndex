@@ -130,3 +130,43 @@ export interface ApiFootballRateLimitInfo {
   minuteRemaining: number | null;
   minuteLimit: number | null;
 }
+
+export interface ApiFootballSquadPlayer {
+  id: number;
+  name: string;
+  age: number | null;
+  number: number | null;
+  position: string | null;
+  photo: string | null;
+}
+
+export interface ApiFootballSquadResponse {
+  team: ApiFootballTeamRef;
+  players: ApiFootballSquadPlayer[];
+}
+
+export interface ApiFootballTransferTeamRef {
+  id: number;
+  name: string;
+  logo: string | null;
+}
+
+export interface ApiFootballTransferItem {
+  date: string;
+  type: string | null;
+  teams: {
+    in: ApiFootballTransferTeamRef;
+    out: ApiFootballTransferTeamRef;
+  };
+}
+
+export interface ApiFootballTransferResponseItem {
+  player: { id: number; name: string };
+  update: string;
+  transfers: ApiFootballTransferItem[];
+}
+
+export interface ApiFootballPlayerSearchItem {
+  player: ApiFootballPlayerCore;
+  statistics: ApiFootballPlayerStatistics[];
+}

@@ -97,20 +97,22 @@ export async function listTrendingPlayers(
     const result = await supabase
       .from("players")
       .select(
-        "id, slug, name, short_name, date_of_birth, nationality, position, image_url, current_team:teams!players_current_team_id_fkey(name, logo_url)",
+        "id, slug, name, short_name, date_of_birth, nationality, position, image_url, current_team:teams!players_current_team_id_fkey(name, logo_url), career:career_stats(goals)",
       )
       .order("name", { ascending: true })
-      .limit(limit);
+      .limit(Math.max(limit * 3, 20));
 
     assertNoError(result.error, "Failed to list trending players");
 
     const playerIds = (result.data ?? []).map((row) => row.id);
     const competitions = await fetchLatestCompetitions(playerIds);
 
-    return (result.data ?? []).map((row) => {
+    return (result.data ?? [])
+      .map((row) => {
       const team = Array.isArray(row.current_team)
         ? row.current_team[0]
         : row.current_team;
+      const career = Array.isArray(row.career) ? row.career[0] : row.career;
 
       return {
         id: row.id,
@@ -126,8 +128,15 @@ export async function listTrendingPlayers(
         clubLogoUrl: team?.logo_url ?? null,
         competition: competitions.get(row.id) ?? null,
         href: playerPath(row.slug),
+        sortGoals: career?.goals ?? 0,
       };
-    });
+    })
+      .sort((a, b) => b.sortGoals - a.sortGoals || a.name.localeCompare(b.name))
+      .slice(0, limit)
+      .map(({ sortGoals, ...player }) => {
+        void sortGoals;
+        return player;
+      });
   } catch {
     return buildLocalPlayerSearchResults().slice(0, limit);
   }

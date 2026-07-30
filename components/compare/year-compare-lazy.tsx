@@ -1,8 +1,12 @@
 import { Suspense } from "react";
 
 import { YearCompareSection } from "@/components/compare/year-compare-section";
+import type { PlayerProfile } from "@/types/domain";
 
 interface YearCompareLazyProps {
+  playerOne: PlayerProfile;
+  playerTwo: PlayerProfile;
+  comparePath: string;
   initialSeason?: string | null;
   initialYear?: string | null;
 }
@@ -23,12 +27,18 @@ function YearCompareFallback() {
  * Suspense boundary for useSearchParams inside YearCompareSection.
  */
 export function YearCompareLazy({
+  playerOne,
+  playerTwo,
+  comparePath,
   initialSeason = null,
   initialYear = null,
 }: YearCompareLazyProps) {
   return (
     <Suspense fallback={<YearCompareFallback />}>
       <YearCompareSection
+        playerOne={playerOne}
+        playerTwo={playerTwo}
+        comparePath={comparePath}
         initialSeason={initialSeason}
         initialYear={initialYear}
       />

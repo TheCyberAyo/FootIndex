@@ -27,12 +27,14 @@ export {
 } from "@/lib/compare/paths";
 
 export {
-  filterSeasonsByQuery,
-  resolveSeasonKey,
-  getSeasonRow,
-  searchYearCompare,
-  buildSeasonCompareMetrics,
-  buildInternationalYearMetrics,
-  formatSeasonClub,
-  SEASON_COMPARE_ROWS,
-} from "@/lib/compare/by-year";
+  buildDynamicSeasonRows,
+  filterDynamicSeasonsByQuery,
+  resolveDynamicSeasonKey,
+  searchDynamicYearCompare,
+  buildDynamicSeasonCompareMetrics,
+  buildDynamicInternationalYearMetrics,
+  formatDynamicSeasonClub,
+  buildSeasonCompareShareUrl,
+} from "@/lib/compare/season-compare";
+
+export { buildComparisonSummary } from "@/lib/compare/summary";

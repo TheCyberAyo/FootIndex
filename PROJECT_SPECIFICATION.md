@@ -4993,3 +4993,88 @@ Next Phase
 ---
 
 END OF PART 6
+
+2. Data model & sync (spec vs built)
+Several spec tables/features do not exist yet:
+
+competitions table — competitions are inferred from text on season_stats, not first-class entities
+countries / seasons / transfers tables — not implemented
+Comparison cache, search history — not implemented
+Player onboarding pipeline — no admin/UI flow to add “Messi”, sync him, and get a full profile automatically
+Career sync on sync — sync intentionally does not overwrite career_stats, trophies, or awards
+So the backend is generalized, but the data pipeline is still manual and rivalry-centric.
+
+3. Player pages (depth)
+Routes exist, but several spec sections are missing or stubbed:
+
+Spec section	Status
+Hero, stats, seasons, trophies, timeline, charts
+Done
+Related players
+Basic (lists other DB players)
+Club history
+Not a dedicated section
+International career
+Not separated from club
+Player records
+Not built
+Similar players (position/style/competition)
+Not smart — just “other players in DB”
+Videos / highlights
+Placeholder only
+Market value, favourites
+Future / not built
+4. Compare engine (generalized)
+Feature	Status
+Any two players — career compare + charts
+Done
+Season/year search (?season= / ?year=)
+Done — any pair via synced season_stats
+Community vote
+Done — comparison_votes per pair (legacy votes migrated for Haaland/Mbappé)
+Comparison summary
+Done — template narrative from career metrics (non-AI v1)
+Generalized shareable season compare for any pair
+Done — ?season= / ?year= + Share this season link (#by-year)
+AI comparison summary
+Not built (future — LLM layer on top of template summary)
+
+5. Rankings, teams, competitions (v1 vs spec)
+You now have pages and sitemaps — good — but they are minimal v1:
+
+Rankings
+
+No filters (competition, season, nationality, age, position) from spec §69
+Leaderboards use career totals only, not “this season in the Premier League” etc.
+Teams
+
+Squad list only
+No fixtures, team stats, or league context (spec §70 marks these as future)
+Competitions
+
+Top scorers from aggregated season rows
+No standings, no proper competition metadata/logos (spec §71)
+6. Search (functional but not complete)
+Full-text search works
+Missing from spec: recent searches, recently viewed, richer filters/facets, dedicated “Players” index page (nav uses /search as a stand-in)
+7. AI & advanced analytics (entirely future)
+Spec mentions AI player summaries, comparison summaries, match reports, similarity scoring. None of this exists. Also explicitly out of scope for v1: xG, deep analytics, Transfermarkt scraping.
+
+8. UX / navigation vs spec
+Spec §52 describes:
+
+Bottom mobile navigation
+Floating search
+“Players” as a top-level section
+Current nav is a desktop sticky header + mobile drawer, with hardcoded Haaland/Mbappé links alongside Search/Rankings. Works, but not the spec’s final IA.
+
+9. News & engagement
+News is curated static content, not a CMS or live feed
+Predictions/comments/votes are live but scoped to the current fixture/player set
+No notifications, favourites, or user dashboards
+10. Ops & polish
+Outside the codebase:
+
+Production deploy / custom domain verification
+Google Search Console submission
+Legal copy is v1 product text, not counsel-reviewed

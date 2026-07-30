@@ -9,7 +9,7 @@ import { AuthMenu } from "@/components/auth/auth-menu";
 import { PlayerSearch } from "@/components/search/player-search";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { defaultComparePath } from "@/lib/compare";
+import { featuredComparePath } from "@/lib/brand/featured-rivalry";
 import { PRIMARY_NAV, SITE_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -66,7 +66,7 @@ export function SiteHeader() {
             asChild
             className="bg-brand text-brand-foreground hover:bg-brand/90"
           >
-            <Link href={`${defaultComparePath()}#vote`}>Vote</Link>
+            <Link href={`${featuredComparePath()}#vote`}>Vote</Link>
           </Button>
         </div>
 
@@ -123,7 +123,7 @@ export function SiteHeader() {
                 asChild
                 className="bg-brand text-brand-foreground hover:bg-brand/90"
               >
-                <Link href={`${defaultComparePath()}#vote`} onClick={() => setOpen(false)}>
+                <Link href={`${featuredComparePath()}#vote`} onClick={() => setOpen(false)}>
                   Vote
                 </Link>
               </Button>

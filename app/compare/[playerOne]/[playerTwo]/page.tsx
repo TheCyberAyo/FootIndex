@@ -8,6 +8,7 @@ import {
   isCompareSlugFormatValid,
 } from "@/lib/compare/load-compare";
 import { isValidCompareSlugPair } from "@/lib/compare/paths";
+import { DEFAULT_COMPARE_SLUGS } from "@/lib/compare/paths";
 import { listPlayers } from "@/services";
 
 export const revalidate = 60;
@@ -21,17 +22,22 @@ interface CompareSlugPageProps {
   }>;
 }
 
+/** Pre-render featured rivalry + a small marquee set — not all N² pairs. */
 export async function generateStaticParams() {
   const players = await listPlayers();
+  const marqueeSlugs = [
+    DEFAULT_COMPARE_SLUGS.playerOne,
+    DEFAULT_COMPARE_SLUGS.playerTwo,
+    ...players.slice(0, 8).map((player) => player.slug),
+  ];
+  const uniqueSlugs = [...new Set(marqueeSlugs)];
   const pairs: Array<{ playerOne: string; playerTwo: string }> = [];
 
-  for (let i = 0; i < players.length; i += 1) {
-    for (let j = 0; j < players.length; j += 1) {
+  for (let i = 0; i < uniqueSlugs.length; i += 1) {
+    for (let j = 0; j < uniqueSlugs.length; j += 1) {
       if (i !== j) {
-        pairs.push({
-          playerOne: players[i].slug,
-          playerTwo: players[j].slug,
-        });
+        const [playerOne, playerTwo] = [uniqueSlugs[i], uniqueSlugs[j]].sort();
+        pairs.push({ playerOne, playerTwo });
       }
     }
   }

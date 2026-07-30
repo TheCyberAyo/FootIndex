@@ -11,7 +11,7 @@ export function PlayerTimeline({ events }: PlayerTimelineProps) {
       id="timeline"
       eyebrow="Journey"
       title="Career timeline"
-      description="Milestones derived from trophies, awards, and high-scoring seasons."
+      description="Milestones from trophies, awards, transfers, and standout seasons."
     >
       {events.length === 0 ? (
         <p className="text-sm text-white/50">Timeline will fill after sync.</p>

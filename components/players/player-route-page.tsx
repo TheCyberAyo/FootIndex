@@ -1,5 +1,6 @@
 import { PlayerProfileView } from "@/components/players/player-profile-view";
 import { RelatedPlayers } from "@/components/players/related-players";
+import { SimilarPlayers } from "@/components/players/similar-players";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
 import { createAthleteJsonLd } from "@/lib/players/json-ld";
@@ -51,6 +52,7 @@ export async function PlayerRoutePage({ slug }: PlayerRoutePageProps) {
       />
       <Breadcrumbs items={breadcrumbItems} />
       <PlayerProfileView profile={profile} rival={rival} />
+      <SimilarPlayers currentSlug={slug} />
       <RelatedPlayers currentSlug={slug} />
     </>
   );

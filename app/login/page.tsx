@@ -7,7 +7,7 @@ import { createPageMetadata } from "@/lib/seo";
 export const metadata = createPageMetadata({
   title: "Sign in",
   description:
-    "Sign in with email magic link or Google to vote in Haaland vs Mbappé.",
+    "Sign in with email magic link or Google to vote, predict, and comment on FootIndex.",
   path: "/login",
   noIndex: true,
 });

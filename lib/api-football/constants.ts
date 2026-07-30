@@ -1,5 +1,5 @@
 /**
- * Verified API-Football IDs (see DECISIONS.md).
+ * Verified API-Football IDs for seed/sync targets.
  * Free plan: seasons 2022–2024 — default sync season is 2024.
  */
 

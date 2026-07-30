@@ -14,6 +14,14 @@ import {
   mapPositionFromStats,
   mapSeasonStatistics,
 } from "@/services/sync/mappers";
+import { hasCuratedCareer } from "@/lib/players/curated";
+import { rollupCareerStatsForPlayer } from "@/services/stats/career-rollup.service";
+import { invalidateComparisonCacheForPlayer } from "@/services/compare/comparison-cache.service";
+import {
+  ensureCompetition,
+  ensureSeason,
+} from "@/services/reference/reference-entities.service";
+import { syncPlayerTrophiesAndTransfers } from "@/services/sync/player-enrichment.service";
 import {
   getSyncablePlayerBySlug,
   listSyncablePlayers,
@@ -22,6 +30,15 @@ import {
 } from "@/services/sync/syncable-players";
 
 export type SyncJob = "players" | "fixtures" | "all";
+
+export interface SyncJobOptions {
+  /** Skip the first N syncable players (alphabetical by slug). */
+  offset?: number;
+  /** Max players to process this request (for batched cron runs). */
+  limit?: number;
+  /** Pause between player API calls (ms) — helps stay within minute limits. */
+  delayMs?: number;
+}
 
 export interface SyncJobResult {
   job: SyncJob;
@@ -123,10 +140,12 @@ async function syncOnePlayer(
   const payload = await fetchPlayerById(player.apiFootballId, season);
 
   if (!payload) {
-    throw new ServiceError(
-      `No API-Football player payload for ${player.slug} (${player.apiFootballId})`,
-      "PLAYER_NOT_FOUND",
-    );
+    return {
+      slug: player.slug,
+      apiId: player.apiFootballId,
+      skipped: true,
+      reason: "PLAYER_NOT_FOUND",
+    };
   }
 
   const supabase = createSupabaseAdminClient();
@@ -171,13 +190,31 @@ async function syncOnePlayer(
   }
 
   for (const stat of seasonStats) {
+    const sourceStat = payload.statistics.find(
+      (item) => item.team.id === stat.teamApiId,
+    );
     const teamId = await ensureTeamByApiId(
       stat.teamApiId,
-      payload.statistics.find((item) => item.team.id === stat.teamApiId)?.team
-        .name ?? "Unknown",
-      payload.statistics.find((item) => item.team.id === stat.teamApiId)?.team
-        .logo ?? null,
+      sourceStat?.team.name ?? "Unknown",
+      sourceStat?.team.logo ?? null,
     );
+
+    let competitionId: string | undefined;
+    let seasonId: string | undefined;
+    try {
+      competitionId = await ensureCompetition({
+        name: stat.competition,
+        apiFootballId: sourceStat?.league.id ?? null,
+        countryName: sourceStat?.league.country ?? null,
+        logoUrl: sourceStat?.league.logo ?? null,
+      });
+      seasonId = await ensureSeason({
+        seasonYear: season,
+        label: stat.season,
+      });
+    } catch {
+      // Reference tables may not exist until migration 20260729300000 is applied.
+    }
 
     const upsert = await supabase.from("season_stats").upsert(
       {
@@ -185,6 +222,8 @@ async function syncOnePlayer(
         team_id: teamId,
         season: stat.season,
         competition: stat.competition,
+        ...(competitionId ? { competition_id: competitionId } : {}),
+        ...(seasonId ? { season_id: seasonId } : {}),
         appearances: stat.appearances,
         goals: stat.goals,
         assists: stat.assists,
@@ -205,12 +244,25 @@ async function syncOnePlayer(
     .maybeSingle();
   assertNoError(careerResult.error, "Failed to read curated career stats");
 
+  let enrichment = { trophiesSynced: 0, transfersSynced: 0, skipped: true };
+  if (!hasCuratedCareer(player.slug)) {
+    await rollupCareerStatsForPlayer(player.id, player.slug);
+    enrichment = await syncPlayerTrophiesAndTransfers({
+      playerId: player.id,
+      slug: player.slug,
+      apiFootballId: player.apiFootballId,
+    });
+    await invalidateComparisonCacheForPlayer(player.id);
+  }
+
   return {
     slug: player.slug,
     apiId: player.apiFootballId,
     seasonRows: seasonStats.length,
     careerGoalsPreserved: careerResult.data?.goals ?? null,
-    careerSource: "curated",
+    careerSource: hasCuratedCareer(player.slug) ? "curated" : "rollup",
+    trophiesSynced: enrichment.trophiesSynced,
+    transfersSynced: enrichment.transfersSynced,
   };
 }
 
@@ -322,25 +374,65 @@ async function syncPlayerAppearances(
   };
 }
 
-async function syncFixtures(
+
+function sliceSyncablePlayers(
   players: SyncablePlayer[],
-  season: number,
-): Promise<Record<string, unknown>> {
-  const results: Record<string, unknown> = {
-    perPlayerLimit: RECENT_MATCHES_PER_PLAYER,
-  };
-
-  for (const player of players) {
-    results[player.slug] = await syncPlayerAppearances(player, season);
+  options: SyncJobOptions,
+): SyncablePlayer[] {
+  const offset = Math.max(0, options.offset ?? 0);
+  if (options.limit != null && options.limit > 0) {
+    return players.slice(offset, offset + options.limit);
   }
+  if (offset > 0) {
+    return players.slice(offset);
+  }
+  return players;
+}
 
-  return results;
+function summarizePlayerResults(
+  results: Record<string, unknown>,
+): { synced: number; skipped: number; deferred: number } {
+  let synced = 0;
+  let skipped = 0;
+  let deferred = 0;
+  for (const row of Object.values(results)) {
+    if (row && typeof row === "object" && "skipped" in row && row.skipped) {
+      if ("reason" in row && row.reason === "API_RATE_LIMIT_DEFERRED") {
+        deferred += 1;
+      } else {
+        skipped += 1;
+      }
+    } else {
+      synced += 1;
+    }
+  }
+  return { synced, skipped, deferred };
+}
+
+function isDailyRateLimitError(error: unknown): boolean {
+  if (!(error instanceof ServiceError)) {
+    return false;
+  }
+  if (error.code !== "API_FOOTBALL_ERROR") {
+    return false;
+  }
+  const message = error.message.toLowerCase();
+  return message.includes("request limit") || message.includes("rate limit");
+}
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 /**
  * Orchestrates API-Football → Supabase sync for every player with api_football_id.
  */
-export async function runSyncJob(job: SyncJob = "all"): Promise<SyncJobResult> {
+export async function runSyncJob(
+  job: SyncJob = "all",
+  options: SyncJobOptions = {},
+): Promise<SyncJobResult> {
   if (!isApiFootballConfigured()) {
     throw new ServiceError(
       "API_FOOTBALL_KEY is required for sync.",
@@ -356,10 +448,13 @@ export async function runSyncJob(job: SyncJob = "all"): Promise<SyncJobResult> {
 
   const season = resolveSeason();
   const syncablePlayers = await listSyncablePlayers();
+  const batchPlayers = sliceSyncablePlayers(syncablePlayers, options);
   const details: Record<string, unknown> = {
     season,
     siteUrl: getServerEnv().siteUrl,
     playerCount: syncablePlayers.length,
+    batchOffset: options.offset ?? 0,
+    batchSize: batchPlayers.length,
   };
 
   if (syncablePlayers.length === 0) {
@@ -369,14 +464,67 @@ export async function runSyncJob(job: SyncJob = "all"): Promise<SyncJobResult> {
 
   if (job === "players" || job === "all") {
     const playerResults: Record<string, unknown> = {};
-    for (const player of syncablePlayers) {
-      playerResults[player.slug] = await syncOnePlayer(player, season);
+    const delayMs = options.delayMs ?? 0;
+    let rateLimitExhausted = false;
+
+    for (const player of batchPlayers) {
+      if (rateLimitExhausted) {
+        playerResults[player.slug] = {
+          slug: player.slug,
+          apiId: player.apiFootballId,
+          skipped: true,
+          reason: "API_RATE_LIMIT_DEFERRED",
+          message: "Daily API-Football quota exhausted — retry remaining players tomorrow.",
+        };
+        continue;
+      }
+
+      try {
+        playerResults[player.slug] = await syncOnePlayer(player, season);
+        if (delayMs > 0) {
+          await sleep(delayMs);
+        }
+      } catch (error) {
+        playerResults[player.slug] = {
+          slug: player.slug,
+          apiId: player.apiFootballId,
+          skipped: true,
+          reason:
+            error instanceof ServiceError ? error.code : "SYNC_PLAYER_FAILED",
+          message: error instanceof Error ? error.message : "Unknown sync error",
+        };
+        if (isDailyRateLimitError(error)) {
+          rateLimitExhausted = true;
+          details.rateLimitHit = true;
+        }
+      }
     }
     details.players = playerResults;
+    details.playerSyncSummary = summarizePlayerResults(playerResults);
   }
 
   if (job === "fixtures" || job === "all") {
-    details.fixtures = await syncFixtures(syncablePlayers, season);
+    const fixtureResults: Record<string, unknown> = {};
+    for (const player of batchPlayers) {
+      try {
+        fixtureResults[player.slug] = await syncPlayerAppearances(
+          player,
+          season,
+        );
+      } catch (error) {
+        fixtureResults[player.slug] = {
+          slug: player.slug,
+          skipped: true,
+          reason:
+            error instanceof ServiceError ? error.code : "SYNC_FIXTURE_FAILED",
+          message: error instanceof Error ? error.message : "Unknown sync error",
+        };
+      }
+    }
+    details.fixtures = {
+      perPlayerLimit: RECENT_MATCHES_PER_PLAYER,
+      ...fixtureResults,
+    };
   }
 
   return {

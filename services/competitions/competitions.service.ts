@@ -18,6 +18,57 @@ interface SeasonCompetitionRow {
   assists: number;
 }
 
+interface CompetitionRow {
+  id: string;
+  slug: string;
+  name: string;
+  logo_url: string | null;
+}
+
+async function listCompetitionCatalog(): Promise<CompetitionRow[]> {
+  if (!isSupabaseConfigured()) {
+    const names = new Set(localSeasonStats.map((row) => row.competition));
+    return [...names].map((name) => ({
+      id: competitionSlugFromName(name),
+      slug: competitionSlugFromName(name),
+      name,
+      logo_url: null,
+    }));
+  }
+
+  const supabase = createSupabasePublicClient();
+  const result = await supabase
+    .from("competitions")
+    .select("id, slug, name, logo_url")
+    .order("name", { ascending: true });
+
+  if (!result.error && (result.data?.length ?? 0) > 0) {
+    return result.data as CompetitionRow[];
+  }
+
+  const fallback = await supabase
+    .from("season_stats")
+    .select("competition")
+    .limit(1000);
+
+  assertNoError(fallback.error, "Failed to load competition rows");
+
+  const bySlug = new Map<string, CompetitionRow>();
+  for (const row of fallback.data ?? []) {
+    const slug = competitionSlugFromName(row.competition);
+    if (!bySlug.has(slug)) {
+      bySlug.set(slug, {
+        id: slug,
+        slug,
+        name: row.competition,
+        logo_url: null,
+      });
+    }
+  }
+
+  return [...bySlug.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
 async function listSeasonCompetitionRows(): Promise<SeasonCompetitionRow[]> {
   if (!isSupabaseConfigured()) {
     return localSeasonStats.map((row) => ({
@@ -39,19 +90,12 @@ async function listSeasonCompetitionRows(): Promise<SeasonCompetitionRow[]> {
 }
 
 export async function listCompetitions(): Promise<CompetitionSummary[]> {
-  const rows = await listSeasonCompetitionRows();
-  const bySlug = new Map<string, string>();
-
-  for (const row of rows) {
-    const slug = competitionSlugFromName(row.competition);
-    if (!bySlug.has(slug)) {
-      bySlug.set(slug, row.competition);
-    }
-  }
-
-  return [...bySlug.entries()]
-    .map(([slug, name]) => ({ slug, name }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const catalog = await listCompetitionCatalog();
+  return catalog.map((row) => ({
+    slug: row.slug,
+    name: row.name,
+    logoUrl: row.logo_url,
+  }));
 }
 
 export async function getCompetitionBySlug(
@@ -84,7 +128,8 @@ export async function listCompetitionLeaderboard(
   >();
 
   for (const row of rows) {
-    if (competitionSlugFromName(row.competition) !== slug) {
+    const rowSlug = competitionSlugFromName(row.competition);
+    if (rowSlug !== slug) {
       continue;
     }
 

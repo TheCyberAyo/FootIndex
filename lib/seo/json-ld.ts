@@ -108,37 +108,42 @@ export function createNewsArticleJsonLd(article: NewsArticle) {
 
 export const HOME_FAQ: FaqItem[] = [
   {
-    question: "Who has more career goals — Haaland or Mbappé?",
+    question: "What is FootIndex?",
     answer:
-      "Compare Erling Haaland and Kylian Mbappé career goals side by side on the Compare page, including club goals, international (country) goals, and Champions League tallies.",
+      "FootIndex is a football player search engine. Search any player in our database for career stats, season breakdowns, trophies, comparisons, and rankings.",
   },
   {
-    question: "How do Haaland and Mbappé compare for club vs country?",
+    question: "How do I find a player?",
     answer:
-      "Haaland vs Mbappé breaks down club and country achievements — goals for their teams and national sides, plus trophies and awards — with season-by-year search on Compare.",
+      "Use the search bar on the homepage or header, or browse rankings and team pages. Every player with a profile has a URL like /player/erling-haaland.",
   },
   {
-    question: "Who is better — Haaland or Mbappé?",
+    question: "How are career stats calculated?",
     answer:
-      "It depends on the metric. Haaland often leads finishing efficiency and goals-per-game, while Mbappé frequently leads creation and versatility. Use the career comparison, year search, charts, and community vote to decide.",
+      "Featured players Haaland and Mbappé use curated career baselines for accuracy. Other players roll up from synced season rows after API-Football sync.",
   },
   {
-    question: "Where do the Haaland vs Mbappé stats come from?",
+    question: "Can I compare any two players?",
     answer:
-      "Career club and country totals are curated baselines for accuracy. Season form and fixtures sync from API-Football into Supabase alongside trophies and awards.",
+      "Yes — open /compare/player-one/player-two for any two slugs in the database. Haaland vs Mbappé also includes season/year search and a community vote.",
+  },
+  {
+    question: "Where does the data come from?",
+    answer:
+      "Player profiles and season stats sync from API-Football into Supabase. Pages read from our database, never directly from the vendor API.",
   },
 ];
 
 export const ABOUT_FAQ: FaqItem[] = [
   {
-    question: "What is Haaland vs Mbappé?",
+    question: "What is FootIndex?",
     answer:
-      "Haaland vs Mbappé is a football statistics site built to compare Erling Haaland and Kylian Mbappé career achievements for club and country — goals, trophies, awards, and season-by-season stats.",
+      "FootIndex is a football statistics platform built as a player search engine — profiles, comparisons, rankings, teams, and competitions with modern UX and strong SEO.",
   },
   {
-    question: "Can I compare Haaland and Mbappé by season or year?",
+    question: "How do I add more players?",
     answer:
-      "Yes. On Compare, search any season or calendar year to see club form side by side, plus international goals when you search a calendar year.",
+      "Seed the starter catalog via POST /api/players/catalog (admin), or import individual API-Football IDs via POST /api/players/import, then run sync.",
   },
   {
     question: "Which stack powers the site?",

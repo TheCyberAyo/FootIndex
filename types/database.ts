@@ -23,6 +23,7 @@ export type PlayerPosition = "GK" | "DF" | "MF" | "FW";
 export type VoteChoice = "haaland" | "mbappe";
 export type CommentEntityType = "player" | "compare" | "news" | "prediction";
 export type LikeEntityType = "comment" | "prediction" | "news";
+export type CompetitionType = "league" | "cup" | "international" | "other";
 
 export type TeamRow = {
   id: string;
@@ -96,6 +97,8 @@ export type SeasonStatRow = {
   team_id: string | null;
   season: string;
   competition: string;
+  competition_id: string | null;
+  season_id: string | null;
   appearances: number;
   goals: number;
   assists: number;
@@ -104,6 +107,69 @@ export type SeasonStatRow = {
   red_cards: number;
   created_at: string;
   updated_at: string;
+}
+
+export type CountryRow = {
+  id: string;
+  name: string;
+  code: string | null;
+  flag_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CompetitionRow = {
+  id: string;
+  slug: string;
+  name: string;
+  api_football_id: number | null;
+  country_id: string | null;
+  logo_url: string | null;
+  competition_type: CompetitionType;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SeasonRow = {
+  id: string;
+  year: number;
+  label: string;
+  start_date: string | null;
+  end_date: string | null;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type TransferRow = {
+  id: string;
+  player_id: string;
+  from_team_id: string | null;
+  to_team_id: string | null;
+  transfer_date: string;
+  transfer_type: string | null;
+  fee_text: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ComparisonCacheRow = {
+  id: string;
+  player_one_id: string;
+  player_two_id: string;
+  season_filter: string;
+  comparison_json: Json;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SearchHistoryRow = {
+  id: string;
+  user_id: string | null;
+  session_id: string | null;
+  search_term: string;
+  player_id: string | null;
+  created_at: string;
 }
 
 export type CareerStatRow = {
@@ -155,6 +221,16 @@ export type VoteRow = {
   id: string;
   user_id: string;
   choice: VoteChoice;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ComparisonVoteRow = {
+  id: string;
+  user_id: string;
+  player_one_id: string;
+  player_two_id: string;
+  choice_player_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -391,6 +467,8 @@ export interface Database {
           team_id?: string | null;
           season: string;
           competition: string;
+          competition_id?: string | null;
+          season_id?: string | null;
           appearances?: number;
           goals?: number;
           assists?: number;
@@ -406,6 +484,8 @@ export interface Database {
           team_id?: string | null;
           season?: string;
           competition?: string;
+          competition_id?: string | null;
+          season_id?: string | null;
           appearances?: number;
           goals?: number;
           assists?: number;
@@ -540,6 +620,166 @@ export interface Database {
             referencedColumns: ["id"];
           },
         ];
+      };
+      countries: {
+        Row: CountryRow;
+        Insert: {
+          id?: string;
+          name: string;
+          code?: string | null;
+          flag_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          code?: string | null;
+          flag_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      competitions: {
+        Row: CompetitionRow;
+        Insert: {
+          id?: string;
+          slug: string;
+          name: string;
+          api_football_id?: number | null;
+          country_id?: string | null;
+          logo_url?: string | null;
+          competition_type?: CompetitionType;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          name?: string;
+          api_football_id?: number | null;
+          country_id?: string | null;
+          logo_url?: string | null;
+          competition_type?: CompetitionType;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      seasons: {
+        Row: SeasonRow;
+        Insert: {
+          id?: string;
+          year: number;
+          label: string;
+          start_date?: string | null;
+          end_date?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          year?: number;
+          label?: string;
+          start_date?: string | null;
+          end_date?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      transfers: {
+        Row: TransferRow;
+        Insert: {
+          id?: string;
+          player_id: string;
+          from_team_id?: string | null;
+          to_team_id?: string | null;
+          transfer_date: string;
+          transfer_type?: string | null;
+          fee_text?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          player_id?: string;
+          from_team_id?: string | null;
+          to_team_id?: string | null;
+          transfer_date?: string;
+          transfer_type?: string | null;
+          fee_text?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      comparison_cache: {
+        Row: ComparisonCacheRow;
+        Insert: {
+          id?: string;
+          player_one_id: string;
+          player_two_id: string;
+          season_filter?: string;
+          comparison_json: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          player_one_id?: string;
+          player_two_id?: string;
+          season_filter?: string;
+          comparison_json?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      comparison_votes: {
+        Row: ComparisonVoteRow;
+        Insert: {
+          id?: string;
+          user_id: string;
+          player_one_id: string;
+          player_two_id: string;
+          choice_player_id: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          player_one_id?: string;
+          player_two_id?: string;
+          choice_player_id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      search_history: {
+        Row: SearchHistoryRow;
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          session_id?: string | null;
+          search_term: string;
+          player_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          session_id?: string | null;
+          search_term?: string;
+          player_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
       };
       users: {
         Row: UserRow;
@@ -717,6 +957,7 @@ export interface Database {
       vote_choice: VoteChoice;
       comment_entity_type: CommentEntityType;
       like_entity_type: LikeEntityType;
+      competition_type: CompetitionType;
     };
     CompositeTypes: {
       [_ in never]: never;

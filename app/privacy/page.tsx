@@ -48,7 +48,7 @@ export default function PrivacyPage() {
           <ProseSection title="Who we are">
             <p>
               {SITE_NAME} is an independent football statistics site comparing
-              Erling Haaland and Kylian Mbappé. We are not affiliated with FIFA,
+              {SITE_NAME} compares football players using public statistics. We are not affiliated with FIFA,
               UEFA, Premier League, La Liga, Manchester City, Real Madrid, or
               either player.
             </p>

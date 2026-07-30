@@ -32,17 +32,33 @@ function resolveTeamApiId(player: PlayerWithTeam): number | null {
  */
 export async function listSyncablePlayers(): Promise<SyncablePlayer[]> {
   const supabase = createSupabaseAdminClient();
-  const result = await supabase
-    .from("players")
-    .select(
-      "id, slug, api_football_id, current_team:teams!players_current_team_id_fkey(api_football_id)",
-    )
-    .not("api_football_id", "is", null)
-    .order("slug", { ascending: true });
+  const pageSize = 1000;
+  const rows: PlayerWithTeam[] = [];
+  let from = 0;
 
-  assertNoError(result.error, "Failed to list syncable players");
+  while (true) {
+    const result = await supabase
+      .from("players")
+      .select(
+        "id, slug, api_football_id, current_team:teams!players_current_team_id_fkey(api_football_id)",
+      )
+      .not("api_football_id", "is", null)
+      .order("slug", { ascending: true })
+      .range(from, from + pageSize - 1);
 
-  return ((result.data ?? []) as PlayerWithTeam[])
+    assertNoError(result.error, "Failed to list syncable players");
+
+    const page = (result.data ?? []) as PlayerWithTeam[];
+    rows.push(...page);
+
+    if (page.length < pageSize) {
+      break;
+    }
+
+    from += pageSize;
+  }
+
+  return rows
     .filter((row): row is PlayerWithTeam & { api_football_id: number } =>
       row.api_football_id != null,
     )

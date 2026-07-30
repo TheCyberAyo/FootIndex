@@ -2,6 +2,9 @@ import { apiFootballFetch } from "@/lib/api-football/client";
 import type {
   ApiFootballFixtureItem,
   ApiFootballPlayerResponseItem,
+  ApiFootballPlayerSearchItem,
+  ApiFootballSquadResponse,
+  ApiFootballTransferResponseItem,
   ApiFootballTrophyItem,
 } from "@/lib/api-football/types";
 
@@ -57,6 +60,38 @@ export async function fetchPlayerTrophies(
   const { data } = await apiFootballFetch<ApiFootballTrophyItem[]>(
     "/trophies",
     { player: playerId },
+  );
+  return data;
+}
+
+/** Full squad — one API call per team (used for world player import). */
+export async function fetchTeamSquad(
+  teamApiId: number,
+): Promise<ApiFootballSquadResponse | null> {
+  const { data } = await apiFootballFetch<ApiFootballSquadResponse[]>(
+    "/players/squads",
+    { team: teamApiId },
+  );
+  return data[0] ?? null;
+}
+
+export async function fetchPlayerTransfers(
+  playerId: number,
+): Promise<ApiFootballTransferResponseItem[]> {
+  const { data } = await apiFootballFetch<ApiFootballTransferResponseItem[]>(
+    "/transfers",
+    { player: playerId },
+  );
+  return data;
+}
+
+export async function searchPlayersByName(
+  search: string,
+  season: number,
+): Promise<ApiFootballPlayerSearchItem[]> {
+  const { data } = await apiFootballFetch<ApiFootballPlayerSearchItem[]>(
+    "/players",
+    { search, season },
   );
   return data;
 }

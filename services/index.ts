@@ -2,8 +2,20 @@ export {
   listPlayers,
   getPlayerBySlug,
   getPlayerProfileBySlug,
+  getFeaturedRivalryProfiles,
   getComparisonProfiles,
 } from "@/services/players/players.service";
+
+export {
+  importPlayerByApiId,
+  seedStarterPlayerCatalog,
+} from "@/services/players/player-import.service";
+
+export { importWorldSquads } from "@/services/players/world-import.service";
+export type {
+  WorldImportOptions,
+  WorldImportSummary,
+} from "@/services/players/world-import.service";
 
 export {
   getCareerStatsByPlayerId,
@@ -64,5 +76,26 @@ export {
   MIN_QUERY_LENGTH,
   SEARCH_DEFAULT_LIMIT,
 } from "@/services/search/search.service";
+
+export {
+  recordSearchHistory,
+  listRecentSearches,
+  listRecentSearchTerms,
+} from "@/services/search/search-history.service";
+
+export {
+  getCachedComparison,
+  invalidateComparisonCacheForPlayer,
+} from "@/services/compare/comparison-cache.service";
+
+export { listSimilarPlayers } from "@/services/players/similar-players.service";
+export type { SimilarPlayerResult } from "@/services/players/similar-players.service";
+export { listTransfersByPlayerId } from "@/services/players/transfers.service";
+
+export {
+  ensureCountryByName,
+  ensureCompetition,
+  ensureSeason,
+} from "@/services/reference/reference-entities.service";
 
 export { ServiceError } from "@/services/errors";

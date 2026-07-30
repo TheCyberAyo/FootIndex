@@ -1,20 +1,21 @@
-export const SITE_NAME = "Haaland vs Mbappé";
+export const SITE_NAME = "FootIndex";
+export const SITE_TAGLINE = "Search any football player";
 export const SITE_DESCRIPTION =
-  "Haaland vs Mbappé career comparison — Erling Haaland and Kylian Mbappé club and country goals, Champions League tallies, trophies, awards, and season-by-season stats.";
+  "FootIndex is a football player search engine — career stats, comparisons, rankings, trophies, and season-by-season data for every player in our database.";
 export const SITE_KEYWORDS = [
-  "Haaland vs Mbappé",
-  "Haaland vs Mbappe",
-  "Erling Haaland",
-  "Kylian Mbappé",
-  "Kylian Mbappe",
-  "Haaland career goals",
-  "Mbappé career goals",
-  "Haaland vs Mbappé stats",
-  "Haaland vs Mbappé trophies",
-  "Haaland vs Mbappé Champions League",
-  "club vs country goals",
-  "football comparison",
+  "FootIndex",
+  "football player search",
+  "football stats",
+  "player comparison",
+  "career goals",
+  "football rankings",
   "soccer stats",
+  "Haaland stats",
+  "Mbappé stats",
+  "Messi stats",
+  "Ronaldo stats",
+  "Premier League stats",
+  "Champions League goals",
 ] as const;
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -24,22 +25,7 @@ export const BRAND_COLOR = "#6CABDD";
 
 /** Public contact address (mailto on /contact). Override via env in production. */
 export const SITE_CONTACT_EMAIL =
-  process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@haalandvsmbappe.com";
-
-export const PLAYERS = {
-  haaland: {
-    slug: "haaland",
-    name: "Erling Haaland",
-    shortName: "Haaland",
-    path: "/player/haaland",
-  },
-  mbappe: {
-    slug: "mbappe",
-    name: "Kylian Mbappé",
-    shortName: "Mbappé",
-    path: "/player/mbappe",
-  },
-} as const;
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@footindex.com";
 
 export interface NavItem {
   href: string;
@@ -50,9 +36,7 @@ export const PRIMARY_NAV: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/search", label: "Search" },
   { href: "/rankings", label: "Rankings" },
-  { href: "/player/haaland", label: "Haaland" },
-  { href: "/player/mbappe", label: "Mbappé" },
-  { href: "/compare/haaland/mbappe", label: "Compare" },
+  { href: "/compare", label: "Compare" },
   { href: "/competition", label: "Competitions" },
   { href: "/predict", label: "Predict" },
   { href: "/stats", label: "Stats" },
@@ -61,8 +45,8 @@ export const PRIMARY_NAV: NavItem[] = [
 ];
 
 export const FOOTER_NAV: NavItem[] = [
-  { href: "/player/haaland", label: "Haaland" },
-  { href: "/player/mbappe", label: "Mbappé" },
+  { href: "/search", label: "Search" },
+  { href: "/rankings", label: "Rankings" },
   { href: "/about", label: "About" },
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },

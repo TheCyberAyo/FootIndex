@@ -1,17 +1,16 @@
 import Link from "next/link";
 
-import { HomeChartsSection } from "@/components/charts/home-charts-section";
-import { CareerComparePreview } from "@/components/home/career-compare-preview";
+import { FeaturedRivalrySection } from "@/components/home/featured-rivalry-section";
 import { HomeHero } from "@/components/home/home-hero";
 import { LiveScoresSectionClient } from "@/components/home/live-scores-section-client";
+import { TrendingPlayersGrid } from "@/components/home/trending-players-grid";
 import { RankingTable } from "@/components/rankings/ranking-table";
 import { PredictionsSection } from "@/components/predictions/predictions-section";
 import { GlassCard } from "@/components/shared/glass-card";
 import { Section } from "@/components/shared/section";
 import { Button } from "@/components/ui/button";
 import { JsonLd } from "@/components/seo/json-ld";
-import { VoteSection } from "@/components/votes/vote-section";
-import { SITE_NAME } from "@/lib/constants";
+import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/constants";
 import { createPageMetadata } from "@/lib/seo";
 import {
   createBreadcrumbJsonLd,
@@ -19,7 +18,7 @@ import {
   HOME_FAQ,
 } from "@/lib/seo/json-ld";
 import {
-  getComparisonProfiles,
+  getFeaturedRivalryProfiles,
   getTopScorersPreview,
   listLiveScoreCards,
   listTrendingPlayers,
@@ -28,8 +27,7 @@ import { RECENT_MATCHES_PER_PLAYER } from "@/lib/api-football/constants";
 
 export const metadata = createPageMetadata({
   title: SITE_NAME,
-  description:
-    "Haaland vs Mbappé career comparison — Erling Haaland and Kylian Mbappé club and country goals, Champions League stats, trophies, awards, and season-by-season head-to-head.",
+  description: SITE_DESCRIPTION,
   path: "/",
 });
 
@@ -37,37 +35,37 @@ export const revalidate = 60;
 
 const FEATURE_CARDS = [
   {
-    title: "Career Goals",
-    body: "Club and international tallies, side by side.",
+    title: "Player search",
+    body: "Find any footballer in our database instantly.",
   },
   {
-    title: "Assists & Minutes",
-    body: "Creation and workload, not just finishing.",
+    title: "Career stats",
+    body: "Goals, assists, trophies, and season breakdowns.",
   },
   {
-    title: "Goals Per Game",
-    body: "Efficiency metrics that cut through noise.",
+    title: "Head-to-head",
+    body: "Compare any two players side by side.",
   },
   {
-    title: "Champions League",
-    body: "Europe’s biggest stage, tracked cleanly.",
+    title: "Rankings",
+    body: "Top scorers, assists, and position leaderboards.",
   },
   {
-    title: "Trophies & Awards",
-    body: "Silverware and individual recognition.",
+    title: "Teams & competitions",
+    body: "Squads, competition hubs, and top scorers.",
   },
   {
-    title: "Charts",
-    body: "Radar, bar, pie, and season lines — live on Compare.",
+    title: "Community",
+    body: "Votes, predictions, and comments on key pages.",
   },
 ] as const;
 
 export default async function HomePage() {
-  const [{ haaland, mbappe }, liveCards, trending, topScorers] =
+  const [{ playerOne, playerTwo }, liveCards, trending, topScorers] =
     await Promise.all([
-      getComparisonProfiles(),
+      getFeaturedRivalryProfiles(),
       listLiveScoreCards(),
-      listTrendingPlayers(),
+      listTrendingPlayers(9),
       getTopScorersPreview(5),
     ]);
 
@@ -86,9 +84,26 @@ export default async function HomePage() {
       <HomeHero trending={trending} />
 
       <Section
+        eyebrow="Discover"
+        title="Players in the database"
+        description="Profiles are generated dynamically — add more via the starter catalog and sync."
+      >
+        <TrendingPlayersGrid players={trending} />
+        <div className="mt-6">
+          <Button
+            asChild
+            variant="outline"
+            className="border-white/20 bg-transparent text-white hover:bg-white/10"
+          >
+            <Link href="/search">Search all players</Link>
+          </Button>
+        </div>
+      </Section>
+
+      <Section
         eyebrow="Recent appearances"
         title="Last matches played"
-        description={`Only fixtures Haaland and Mbappé played in — most recent ${RECENT_MATCHES_PER_PLAYER} each. Cards refresh while a match is live.`}
+        description={`Most recent ${RECENT_MATCHES_PER_PLAYER} synced appearances per tracked player. Cards refresh while a match is live.`}
       >
         <LiveScoresSectionClient
           initialCards={liveCards}
@@ -96,15 +111,10 @@ export default async function HomePage() {
         />
       </Section>
 
-      <Section
-        eyebrow="Career comparison"
-        title="Numbers that fuel the debate"
-        description="Career rollups update when you run /api/sync (players job). Until then, seed or last sync wins."
-      >
-        <CareerComparePreview haaland={haaland} mbappe={mbappe} />
-      </Section>
-
-      <HomeChartsSection haaland={haaland} mbappe={mbappe} />
+      <FeaturedRivalrySection
+        playerOne={playerOne}
+        playerTwo={playerTwo}
+      />
 
       <Section
         eyebrow="Rankings"
@@ -123,13 +133,12 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      <VoteSection nextPath="/#vote" />
       <PredictionsSection nextPath="/#predict" compact />
 
       <Section
-        eyebrow="Home features"
-        title="Built for the debate"
-        description="Charts, voting, predictions, and comments are live."
+        eyebrow="Platform"
+        title="Built for football discovery"
+        description="Search-first stats with comparisons, charts, and community features."
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURE_CARDS.map((card) => (
@@ -141,31 +150,12 @@ export default async function HomePage() {
             </GlassCard>
           ))}
         </div>
-
-        <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-          <Button
-            asChild
-            className="bg-brand text-brand-foreground hover:bg-brand/90"
-          >
-            <Link href="/player/haaland">Haaland</Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            className="border-white/20 bg-transparent text-white hover:bg-white/10"
-          >
-            <Link href="/player/mbappe">Mbappé</Link>
-          </Button>
-          <Button asChild variant="ghost" className="text-white hover:bg-white/10">
-            <Link href="/stats">Latest Stats</Link>
-          </Button>
-        </div>
       </Section>
 
       <Section
         eyebrow="FAQ"
         title="Quick answers"
-        description="The rivalry, the data sources, and how engagement works."
+        description="How FootIndex works, where data comes from, and how to explore players."
       >
         <div className="grid gap-4">
           {HOME_FAQ.map((item) => (

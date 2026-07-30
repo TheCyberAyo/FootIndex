@@ -20,19 +20,19 @@ import {
   buildGoalsPie,
 } from "@/lib/charts";
 import { buildComparison, formatCompareValue } from "@/lib/compare";
+import { FEATURED_RIVALRY } from "@/lib/brand/featured-rivalry";
 import { createPageMetadata } from "@/lib/seo";
 import { getComparisonProfiles } from "@/services";
 import type { SeasonStats } from "@/types/domain";
 
 export const metadata = createPageMetadata({
   title: "Season & Career Stats",
-  description:
-    "Haaland vs Mbappé statistics hub — season tables, career goals, club vs international splits, and efficiency charts for Erling Haaland and Kylian Mbappé.",
+  description: `Statistics hub — season tables, career efficiency, and charts. Featured: ${FEATURED_RIVALRY.title}.`,
   path: "/stats",
   keywords: [
-    "Haaland stats",
-    "Mbappé stats",
-    "Haaland vs Mbappé season stats",
+    "football stats",
+    "career stats",
+    FEATURED_RIVALRY.title,
   ],
 });
 
@@ -134,8 +134,8 @@ export default async function StatsPage() {
     <>
       <PageHeader
         eyebrow="Statistics"
-        title="Latest Stats"
-        description="Career efficiency, season trends, and competition lines synced from API-Football."
+        title="Featured stats"
+        description={`${FEATURED_RIVALRY.title} — career efficiency, season trends, and competition lines synced from API-Football.`}
       />
 
       <Section

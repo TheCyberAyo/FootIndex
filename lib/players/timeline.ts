@@ -1,11 +1,11 @@
-import type { Award, SeasonStats, Trophy } from "@/types/domain";
+import type { Award, PlayerTransfer, SeasonStats, Trophy } from "@/types/domain";
 
 export interface TimelineEvent {
   id: string;
   year: number;
   title: string;
   subtitle: string;
-  kind: "trophy" | "award" | "season";
+  kind: "trophy" | "award" | "season" | "transfer";
 }
 
 /**
@@ -16,10 +16,26 @@ export function buildCareerTimeline(input: {
   trophies: Trophy[];
   awards: Award[];
   seasons: SeasonStats[];
+  transfers?: PlayerTransfer[];
   limit?: number;
 }): TimelineEvent[] {
   const limit = input.limit ?? 12;
   const events: TimelineEvent[] = [];
+
+  (input.transfers ?? []).forEach((transfer) => {
+    const year = Number(transfer.transferDate.slice(0, 4)) || 0;
+    const from = transfer.fromTeam?.short_name ?? transfer.fromTeam?.name ?? "Previous club";
+    const to = transfer.toTeam?.short_name ?? transfer.toTeam?.name ?? "New club";
+    events.push({
+      id: `transfer-${transfer.id}`,
+      year,
+      title: `${from} → ${to}`,
+      subtitle: transfer.transferType
+        ? `Transfer · ${transfer.transferType}`
+        : "Transfer",
+      kind: "transfer",
+    });
+  });
 
   input.trophies.forEach((trophy) => {
     events.push({

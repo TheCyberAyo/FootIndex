@@ -3,11 +3,13 @@ import { CommentsSection } from "@/components/comments/comments-section";
 import { CompareMetricsList } from "@/components/compare/compare-metrics-list";
 import { CompareScoreboardCard } from "@/components/compare/compare-scoreboard";
 import { CompareStickyHeader } from "@/components/compare/compare-sticky-header";
+import { CompareSummarySection } from "@/components/compare/compare-summary-section";
 import { YearCompareLazy } from "@/components/compare/year-compare-lazy";
 import { Container } from "@/components/shared/container";
 import { Section } from "@/components/shared/section";
-import { VoteSection } from "@/components/votes/vote-section";
-import { buildComparison, isFeaturedRivalryCompare } from "@/lib/compare";
+import { CompareVoteSection } from "@/components/votes/compare-vote-section";
+import { buildComparison } from "@/lib/compare";
+import type { CompareResult } from "@/lib/compare/types";
 import type { PlayerProfile } from "@/types/domain";
 
 interface CompareBoardProps {
@@ -15,6 +17,7 @@ interface CompareBoardProps {
   playerTwo: PlayerProfile;
   comparePath: string;
   entityId: string;
+  comparison?: CompareResult;
   initialSeason?: string | null;
   initialYear?: string | null;
 }
@@ -27,14 +30,11 @@ export function CompareBoard({
   playerTwo,
   comparePath,
   entityId,
+  comparison: comparisonProp,
   initialSeason = null,
   initialYear = null,
 }: CompareBoardProps) {
-  const comparison = buildComparison(playerOne, playerTwo);
-  const featured = isFeaturedRivalryCompare(
-    playerOne.player.slug,
-    playerTwo.player.slug,
-  );
+  const comparison = comparisonProp ?? buildComparison(playerOne, playerTwo);
   const playerOneName = playerOne.player.short_name;
   const playerTwoName = playerTwo.player.short_name;
 
@@ -62,16 +62,27 @@ export function CompareBoard({
         <CompareMetricsList metrics={comparison.metrics} />
       </Section>
 
-      {featured ? (
-        <YearCompareLazy
-          initialSeason={initialSeason}
-          initialYear={initialYear}
-        />
-      ) : null}
+      <CompareSummarySection
+        playerOne={playerOne}
+        playerTwo={playerTwo}
+        comparison={comparison}
+      />
+
+      <YearCompareLazy
+        playerOne={playerOne}
+        playerTwo={playerTwo}
+        comparePath={comparePath}
+        initialSeason={initialSeason}
+        initialYear={initialYear}
+      />
 
       <CompareChartsSection playerOne={playerOne} playerTwo={playerTwo} />
 
-      {featured ? <VoteSection nextPath={`${comparePath}#vote`} /> : null}
+      <CompareVoteSection
+        playerOneSlug={playerOne.player.slug}
+        playerTwoSlug={playerTwo.player.slug}
+        nextPath={`${comparePath}#vote`}
+      />
 
       <CommentsSection
         entityType="compare"

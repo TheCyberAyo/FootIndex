@@ -57,10 +57,9 @@ See [`docs/PHASE_3_SYNC.md`](./docs/PHASE_3_SYNC.md) to sync API-Football → Su
 - `GET /api/stats` · `GET /api/matches` · home appearances · `/compare` · `/stats`
 - Legal: `/privacy` · `/terms` · `/contact` · `/api-docs`
 
-## Project rules & decisions
+## Project rules
 
 - [PROJECT_RULES.md](./PROJECT_RULES.md) — coding standards
-- [DECISIONS.md](./DECISIONS.md) — API, auth, sync, news, launch
 
 ## Architecture notes
 

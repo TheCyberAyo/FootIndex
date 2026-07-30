@@ -201,7 +201,7 @@ export const localCareerStats: CareerStats[] = [
   },
 ];
 
-export const localSeasonStats: SeasonStats[] = [
+const localSeasonStatsSeed = [
   {
     id: "szn-h-1",
     player_id: SEED_PLAYER_IDS.haaland,
@@ -299,6 +299,12 @@ export const localSeasonStats: SeasonStats[] = [
     team: teamById(SEED_TEAM_IDS.france),
   },
 ];
+
+export const localSeasonStats: SeasonStats[] = localSeasonStatsSeed.map((row) => ({
+  ...row,
+  competition_id: null,
+  season_id: null,
+}));
 
 export const localAwards: Award[] = [
   {
@@ -776,6 +782,7 @@ export function buildLocalPlayerProfile(slug: string): PlayerProfile | null {
     seasons: localSeasonStats.filter((item) => item.player_id === player.id),
     awards: localAwards.filter((item) => item.player_id === player.id),
     trophies: localTrophies.filter((item) => item.player_id === player.id),
+    transfers: [],
   };
 }
 

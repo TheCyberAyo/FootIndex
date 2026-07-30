@@ -1,14 +1,11 @@
 import { ImageResponse } from "next/og";
 
-import { BRAND_COLOR } from "@/lib/constants";
+import { BRAND_COLOR, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 
-export const alt = "Haaland vs Mbappé — live football stats rivalry";
+export const alt = `${SITE_NAME} — football player search engine`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/**
- * Default Open Graph / social share image — black field, brand City blue VS.
- */
 export default function OpenGraphImage() {
   return new ImageResponse(
     (
@@ -36,21 +33,19 @@ export default function OpenGraphImage() {
             marginBottom: 24,
           }}
         >
-          Live football stats
+          {SITE_NAME}
         </div>
         <div
           style={{
             display: "flex",
-            alignItems: "center",
-            gap: 28,
-            fontSize: 72,
+            fontSize: 56,
             fontWeight: 800,
-            letterSpacing: -2,
+            letterSpacing: -1,
+            textAlign: "center",
+            maxWidth: 900,
           }}
         >
-          <span>Haaland</span>
-          <span style={{ color: BRAND_COLOR, fontSize: 56 }}>VS</span>
-          <span>Mbappé</span>
+          {SITE_TAGLINE}
         </div>
         <div
           style={{
@@ -60,7 +55,7 @@ export default function OpenGraphImage() {
             color: "rgba(255,255,255,0.55)",
           }}
         >
-          Goals · Charts · Votes · Predictions
+          Stats · Compare · Rankings · Search
         </div>
       </div>
     ),

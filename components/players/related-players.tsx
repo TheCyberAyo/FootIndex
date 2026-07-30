@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Section } from "@/components/shared/section";
 import { compareCanonicalPath } from "@/lib/compare/paths";
 import { playerPath } from "@/lib/players/paths";
-import { listPlayers } from "@/services";
+import { getPlayerProfileBySlug, listPlayers } from "@/services";
 
 interface RelatedPlayersProps {
   currentSlug: string;
@@ -11,26 +11,62 @@ interface RelatedPlayersProps {
 }
 
 /**
- * Internal linking to other players and comparisons (PROJECT_SPECIFICATION §90, §92).
+ * Teammates and same-competition peers — complements SimilarPlayers scoring.
  */
 export async function RelatedPlayers({
   currentSlug,
   limit = 6,
 }: RelatedPlayersProps) {
-  const players = await listPlayers();
-  const others = players.filter((player) => player.slug !== currentSlug);
+  const [profile, players] = await Promise.all([
+    getPlayerProfileBySlug(currentSlug),
+    listPlayers(),
+  ]);
 
-  if (others.length === 0) {
+  if (!profile) {
     return null;
   }
 
-  const featured = others.slice(0, limit);
+  const currentTeamId = profile.player.current_team_id;
+  const competitions = new Set(profile.seasons.map((row) => row.competition));
+
+  const scored = players
+    .filter((player) => player.slug !== currentSlug)
+    .map((player) => {
+      let score = 0;
+      if (currentTeamId && player.current_team_id === currentTeamId) {
+        score += 3;
+      }
+      if (player.nationality === profile.player.nationality) {
+        score += 1;
+      }
+      return { player, score };
+    })
+    .filter((row) => row.score > 0)
+    .sort(
+      (a, b) =>
+        b.score - a.score || a.player.name.localeCompare(b.player.name),
+    );
+
+  const featured =
+    scored.length > 0
+      ? scored.slice(0, limit).map((row) => row.player)
+      : players
+          .filter((player) => player.slug !== currentSlug)
+          .slice(0, limit);
+
+  if (featured.length === 0) {
+    return null;
+  }
 
   return (
     <Section
       eyebrow="Explore"
-      title="Compare with other players"
-      description="Discover head-to-head stats and career profiles across our player database."
+      title="Related players"
+      description={
+        currentTeamId
+          ? "Teammates and peers from the same competitions in our database."
+          : "More profiles to compare across our player database."
+      }
     >
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {featured.map((player) => (
@@ -47,6 +83,7 @@ export async function RelatedPlayers({
             {player.current_team ? (
               <p className="mt-1 text-sm text-white/50">
                 {player.current_team.name}
+                {competitions.size > 0 ? "" : ""}
               </p>
             ) : null}
             <Link

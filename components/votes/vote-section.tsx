@@ -1,7 +1,5 @@
-import { VotePanel } from "@/components/votes/vote-panel";
-import { Section } from "@/components/shared/section";
-import { getVoteLeaderboard } from "@/services";
-import type { VoteBundle } from "@/types/domain";
+import { CompareVoteSection } from "@/components/votes/compare-vote-section";
+import { FEATURED_RIVALRY } from "@/lib/brand/featured-rivalry";
 
 interface VoteSectionProps {
   nextPath?: string;
@@ -9,31 +7,18 @@ interface VoteSectionProps {
 }
 
 /**
- * Server-hydrated voting section for home + compare (#vote).
- * Decision: only public tallies on the server so pages stay ISR-friendly;
- * auth + user vote hydrate via /api/votes on the client.
+ * Featured rivalry voting — delegates to generalized compare votes.
  */
 export async function VoteSection({
   nextPath = "/compare#vote",
   description = "Sign in with email or Google. One vote per account — change it anytime.",
 }: VoteSectionProps) {
-  const tallies = await getVoteLeaderboard();
-  const initialBundle: VoteBundle = {
-    tallies,
-    totalVotes: tallies.reduce((sum, item) => sum + item.voteCount, 0),
-    userVote: null,
-    isAuthenticated: false,
-    userEmail: null,
-  };
-
   return (
-    <Section
-      id="vote"
-      eyebrow="Community"
-      title="Who is better?"
+    <CompareVoteSection
+      playerOneSlug={FEATURED_RIVALRY.playerOneSlug}
+      playerTwoSlug={FEATURED_RIVALRY.playerTwoSlug}
+      nextPath={nextPath}
       description={description}
-    >
-      <VotePanel initialBundle={initialBundle} nextPath={nextPath} />
-    </Section>
+    />
   );
 }

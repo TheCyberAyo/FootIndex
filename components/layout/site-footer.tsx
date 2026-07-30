@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Container } from "@/components/shared/container";
 import { Separator } from "@/components/ui/separator";
-import { FOOTER_NAV, SITE_NAME } from "@/lib/constants";
+import { FOOTER_NAV, SITE_DESCRIPTION, SITE_NAME } from "@/lib/constants";
 
 /**
  * Server Component footer — static links, no client JS.
@@ -20,10 +20,7 @@ export function SiteFooter() {
               {SITE_NAME}
               <span className="text-brand">.</span>
             </p>
-            <p className="mt-3 text-sm text-white/55">
-              Haaland vs Mbappé career stats — club, country, and
-              head-to-head clarity — built for fans who care about the numbers.
-            </p>
+            <p className="mt-3 text-sm text-white/55">{SITE_DESCRIPTION}</p>
           </div>
 
           <nav aria-label="Footer">

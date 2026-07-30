@@ -2,7 +2,7 @@ import { SEED_NEWS_IDS } from "@/lib/data/seed-ids";
 import type { NewsArticle } from "@/types/domain";
 
 /**
- * Curated news — Decision (DECISIONS.md): no third-party news API in v1.
+ * Curated news — no third-party news API in v1.
  * Fixed UUIDs so comments/likes can target articles without a news table.
  */
 export const CURATED_NEWS: NewsArticle[] = [

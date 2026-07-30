@@ -38,10 +38,31 @@ const ENDPOINTS: ApiEndpoint[] = [
       "Server-only API-Football → Supabase sync for every player with api_football_id (profiles/seasons or club fixtures).",
   },
   {
+    method: "GET | POST",
+    path: "/api/players/world?region=all&maxTeams=10",
+    auth: "Bearer CRON_SECRET",
+    description:
+      "Bulk-import squads from 45+ clubs worldwide (1 API call/team). Add sync=true for per-player stats (uses many API calls).",
+  },
+  {
+    method: "GET | POST",
+    path: "/api/players/catalog",
+    auth: "Bearer CRON_SECRET",
+    description:
+      "Seed marquee players from starter catalog (Messi, Ronaldo, Kane, etc.) and sync each.",
+  },
+  {
+    method: "POST",
+    path: "/api/players/import",
+    auth: "Bearer CRON_SECRET",
+    description:
+      "Body `{ apiFootballId, slug? }` — import one player from API-Football and sync.",
+  },
+  {
     method: "GET",
     path: "/api/players",
     auth: "None",
-    description: "Haaland and Mbappé identity + career summary fields.",
+    description: "Database player count + featured comparison summary.",
   },
   {
     method: "GET",

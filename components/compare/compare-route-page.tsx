@@ -11,6 +11,7 @@ import {
   loadCompareRouteData,
 } from "@/lib/compare/load-compare";
 import { createBreadcrumbJsonLd, createWebPageJsonLd } from "@/lib/seo/json-ld";
+import { getCachedComparison } from "@/services/compare/comparison-cache.service";
 
 interface CompareRoutePageProps {
   playerOneSlug: string;
@@ -36,6 +37,7 @@ export async function CompareRoutePage({
     playerOneSlug,
     playerTwoSlug,
   );
+  const comparison = await getCachedComparison(playerOne, playerTwo);
 
   const title = `${playerOne.player.short_name} vs ${playerTwo.player.short_name} Career Comparison`;
   const breadcrumbItems = [
@@ -66,6 +68,7 @@ export async function CompareRoutePage({
         playerTwo={playerTwo}
         comparePath={path}
         entityId={entityId}
+        comparison={comparison}
         initialSeason={initialSeason}
         initialYear={initialYear}
       />
