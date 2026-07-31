@@ -1,7 +1,7 @@
 # A minimal config so `supabase` CLI users can link this folder.
 # Dashboard SQL apply works without the CLI.
 
-project_id = "haaland-vs-mbappe"
+project_id = "footindex"
 
 [api]
 enabled = true

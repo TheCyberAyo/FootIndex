@@ -38,7 +38,7 @@ export const CURATED_NEWS: NewsArticle[] = [
   },
   {
     id: SEED_NEWS_IDS.rivalryPreview,
-    slug: "haaland-vs-mbappe-numbers-debate",
+    slug: "footindex-featured-compare-debate",
     title: "Haaland vs Mbappé: what the numbers actually settle",
     excerpt:
       "Goals, trophies, and efficiency — a preview of the metrics that fuel the site’s live comparison engine.",

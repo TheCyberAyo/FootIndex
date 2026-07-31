@@ -1,5 +1,5 @@
 -- Consolidated schema (init + RLS + policies + career baseline guard)
--- Phase 2: core schema for Haaland vs Mbappé
+-- Phase 2: core schema for FootIndex
 -- Decision: UUID primary keys for distributed-friendly IDs; api_football_id
 -- nullable unique for Phase 3 upserts without coupling identity to the vendor.
 

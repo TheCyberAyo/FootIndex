@@ -20,11 +20,6 @@ export function HomeHero({ trending = [] }: HomeHeroProps) {
         aria-hidden
         className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(108,171,221,0.22),_transparent_55%),linear-gradient(180deg,#0a0f14_0%,#000_100%)]"
       />
-      <div
-        aria-hidden
-        className="absolute inset-0 opacity-30 bg-[url('/images/hero-haaland-vs-mbappe.png')] bg-cover bg-center"
-      />
-
       <div className="relative z-10 mx-auto flex min-h-[92svh] max-w-7xl flex-col items-center justify-center px-4 py-24 text-center sm:px-6 lg:px-8">
         <motion.p
           className="mb-4 text-xs font-semibold tracking-[0.28em] text-brand uppercase"

@@ -17,7 +17,7 @@ export async function GET() {
 
   return NextResponse.json({
     ok: true,
-    service: "haaland-vs-mbappe",
+    service: "footindex",
     phase: 10,
     supabaseConfigured: isSupabaseConfigured(),
     supabaseAdminConfigured: isSupabaseAdminConfigured(),

@@ -1,6 +1,6 @@
-# Haaland vs Mbappé
+# FootIndex
 
-Premium dark-theme football statistics site comparing **Erling Haaland** and **Kylian Mbappé** on career achievements for club and country.
+Football player search engine — career stats, comparisons, rankings, trophies, and season-by-season data for every player in the database.
 
 Career totals are **curated baselines** (`lib/data/career-baselines.ts`) until Pro multi-season sync; Free-plan API sync updates season form and fixtures only.
 

@@ -248,8 +248,8 @@ export function ComparePlayerPicker({
               Pick any two players
             </h2>
             <p className="mt-1 text-body-sm text-muted-foreground">
-              Search to replace either side. Haaland vs Mbappé stays the default
-              entry — every pair gets its own shareable URL.
+              Search to replace either side. FootIndex opens with a featured
+              compare — every pair gets its own shareable URL.
             </p>
           </div>
           <UserRoundPen

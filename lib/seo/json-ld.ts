@@ -125,7 +125,7 @@ export const HOME_FAQ: FaqItem[] = [
   {
     question: "Can I compare any two players?",
     answer:
-      "Yes — open /compare/player-one/player-two for any two slugs in the database. Haaland vs Mbappé also includes season/year search and a community vote.",
+      "Yes — open /compare/player-one/player-two for any two slugs in the database. FootIndex also includes season/year search and a community vote on featured comparisons.",
   },
   {
     question: "Where does the data come from?",
