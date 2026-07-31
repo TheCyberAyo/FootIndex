@@ -159,8 +159,32 @@ export type ComparisonCacheRow = {
   player_two_id: string;
   season_filter: string;
   comparison_json: Json;
+  ai_summary: string | null;
+  ai_summary_generated_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export type ComparisonViewRow = {
+  id: string;
+  user_id: string | null;
+  session_id: string | null;
+  player_one_id: string;
+  player_two_id: string;
+  viewed_at: string;
+}
+
+export type FavoriteEntityTypeDb = "player" | "team" | "comparison";
+
+export type UserFavoriteRow = {
+  id: string;
+  user_id: string;
+  entity_type: FavoriteEntityTypeDb;
+  player_id: string | null;
+  team_id: string | null;
+  player_one_id: string | null;
+  player_two_id: string | null;
+  created_at: string;
 }
 
 export type SearchHistoryRow = {
@@ -760,6 +784,8 @@ export interface Database {
           player_two_id: string;
           season_filter?: string;
           comparison_json: Json;
+          ai_summary?: string | null;
+          ai_summary_generated_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -769,6 +795,8 @@ export interface Database {
           player_two_id?: string;
           season_filter?: string;
           comparison_json?: Json;
+          ai_summary?: string | null;
+          ai_summary_generated_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -812,6 +840,50 @@ export interface Database {
           session_id?: string | null;
           search_term?: string;
           player_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      comparison_views: {
+        Row: ComparisonViewRow;
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          session_id?: string | null;
+          player_one_id: string;
+          player_two_id: string;
+          viewed_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          session_id?: string | null;
+          player_one_id?: string;
+          player_two_id?: string;
+          viewed_at?: string;
+        };
+        Relationships: [];
+      };
+      user_favorites: {
+        Row: UserFavoriteRow;
+        Insert: {
+          id?: string;
+          user_id: string;
+          entity_type: FavoriteEntityTypeDb;
+          player_id?: string | null;
+          team_id?: string | null;
+          player_one_id?: string | null;
+          player_two_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          entity_type?: FavoriteEntityTypeDb;
+          player_id?: string | null;
+          team_id?: string | null;
+          player_one_id?: string | null;
+          player_two_id?: string | null;
           created_at?: string;
         };
         Relationships: [];

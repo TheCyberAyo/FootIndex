@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { ShareActions } from "@/components/shared/share-actions";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/container";
 import { teamPath } from "@/lib/teams/paths";
@@ -91,6 +92,7 @@ export function PlayerHero({ profile, compareHref }: PlayerHeroProps) {
             )}
           </div>
           <div className="ml-auto flex flex-wrap items-center gap-2">
+            <FavoriteButton entityType="player" playerId={player.id} />
             {compareHref ? (
               <Button
                 asChild

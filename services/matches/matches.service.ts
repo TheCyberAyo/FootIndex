@@ -170,9 +170,6 @@ export async function listRecentMatches(
     .slice(0, limit);
 }
 
-/**
- * Upcoming fixtures for predictions — scheduled (or live) kickoffs from now.
- */
 export async function listUpcomingMatches(limit = 8): Promise<Match[]> {
   const nowIso = new Date().toISOString();
 
@@ -223,5 +220,72 @@ export async function listUpcomingMatches(limit = 8): Promise<Match[]> {
       )
       .sort((a, b) => a.kickoff_at.localeCompare(b.kickoff_at))
       .slice(0, limit);
+  }
+}
+
+/**
+ * Recent and upcoming fixtures involving a team.
+ */
+export async function listMatchesForTeam(
+  teamId: string,
+  limit = 12,
+): Promise<Match[]> {
+  if (!isSupabaseConfigured()) {
+    return localMatches
+      .filter(
+        (match) =>
+          match.home_team_id === teamId || match.away_team_id === teamId,
+      )
+      .sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at))
+      .slice(0, limit);
+  }
+
+  try {
+    const supabase = createSupabasePublicClient();
+    const result = await supabase
+      .from("matches")
+      .select(
+        "*, home_team:teams!matches_home_team_id_fkey(*), away_team:teams!matches_away_team_id_fkey(*)",
+      )
+      .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
+      .order("kickoff_at", { ascending: false })
+      .limit(limit);
+
+    assertNoError(result.error, "Failed to list team matches");
+    return ((result.data ?? []) as MatchWithTeams[]).map(mapMatch);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Fixtures for a competition name (exact match on synced competition label).
+ */
+export async function listMatchesForCompetition(
+  competitionName: string,
+  limit = 12,
+): Promise<Match[]> {
+  if (!isSupabaseConfigured()) {
+    return localMatches
+      .filter((match) => match.competition === competitionName)
+      .sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at))
+      .slice(0, limit);
+  }
+
+  try {
+    const supabase = createSupabasePublicClient();
+    const result = await supabase
+      .from("matches")
+      .select(
+        "*, home_team:teams!matches_home_team_id_fkey(*), away_team:teams!matches_away_team_id_fkey(*)",
+      )
+      .eq("competition", competitionName)
+      .order("kickoff_at", { ascending: false })
+      .limit(limit);
+
+    assertNoError(result.error, "Failed to list competition matches");
+    return ((result.data ?? []) as MatchWithTeams[]).map(mapMatch);
+  } catch {
+    return [];
   }
 }

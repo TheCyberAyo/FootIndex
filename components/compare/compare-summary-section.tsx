@@ -1,7 +1,7 @@
 import { GlassCard } from "@/components/shared/glass-card";
 import { Section } from "@/components/shared/section";
-import { buildComparisonSummary } from "@/lib/compare/summary";
 import type { CompareResult } from "@/lib/compare/types";
+import { getComparisonSummary } from "@/services/compare/ai-summary.service";
 import type { PlayerProfile } from "@/types/domain";
 
 interface CompareSummarySectionProps {
@@ -10,25 +10,30 @@ interface CompareSummarySectionProps {
   comparison: CompareResult;
 }
 
-/**
- * Template-based comparison summary (non-AI v1).
- */
-export function CompareSummarySection({
+export async function CompareSummarySection({
   playerOne,
   playerTwo,
   comparison,
 }: CompareSummarySectionProps) {
-  const summary = buildComparisonSummary(playerOne, playerTwo, comparison);
+  const { text, source } = await getComparisonSummary(
+    playerOne,
+    playerTwo,
+    comparison,
+  );
 
   return (
     <Section
       eyebrow="Summary"
       title="At a glance"
-      description="Auto-generated from synced career stats — not an AI opinion piece."
+      description={
+        source === "ai"
+          ? "AI-generated from synced career stats — refreshes weekly when an API key is configured."
+          : "Auto-generated from synced career stats — template fallback when AI is unavailable."
+      }
     >
       <GlassCard className="p-5 sm:p-6">
         <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
-          {summary}
+          {text}
         </p>
       </GlassCard>
     </Section>

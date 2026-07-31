@@ -7,6 +7,7 @@ import {
 import { playerPath } from "@/lib/players/paths";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { listMostSearchedPlayerIds } from "@/services/search/search-history.service";
+import { listMostViewedComparisons } from "@/services/compare/comparison-views.service";
 
 export interface AnalyticsPlayerRow {
   playerId: string;
@@ -38,13 +39,24 @@ export const EMPTY_ENGAGEMENT: EngagementAnalytics = {
   topNotFoundPaths: [],
 };
 
+export interface AnalyticsComparisonRow {
+  key: string;
+  playerOneName: string;
+  playerTwoName: string;
+  count: number;
+  href: string;
+}
+
 export interface AdminActivityAnalytics {
   searchVolumeLast7Days: number;
   searchVolumeLast30Days: number;
   playerViewsLast7Days: number;
   playerViewsLast30Days: number;
+  comparisonViewsLast7Days: number;
+  comparisonViewsLast30Days: number;
   mostSearchedPlayers: AnalyticsPlayerRow[];
   mostViewedPlayers: AnalyticsPlayerRow[];
+  mostViewedComparisons: AnalyticsComparisonRow[];
   topSearchTerms: Array<{ term: string; count: number }>;
   engagement: EngagementAnalytics;
 }
@@ -93,7 +105,7 @@ async function loadPlayerSummaries(
 }
 
 async function countSince(
-  table: "search_history" | "player_views",
+  table: "search_history" | "player_views" | "comparison_views",
   column: "created_at" | "viewed_at",
   sinceIso: string,
 ): Promise<number> {
@@ -201,8 +213,11 @@ async function getAdminActivityAnalyticsUncached(): Promise<AdminActivityAnalyti
       searchVolumeLast30Days: 0,
       playerViewsLast7Days: 0,
       playerViewsLast30Days: 0,
+      comparisonViewsLast7Days: 0,
+      comparisonViewsLast30Days: 0,
       mostSearchedPlayers: [],
       mostViewedPlayers: [],
+      mostViewedComparisons: [],
       topSearchTerms: [],
       engagement: EMPTY_ENGAGEMENT,
     };
@@ -217,8 +232,11 @@ async function getAdminActivityAnalyticsUncached(): Promise<AdminActivityAnalyti
     searchVolumeLast30Days,
     playerViewsLast7Days,
     playerViewsLast30Days,
+    comparisonViewsLast7Days,
+    comparisonViewsLast30Days,
     mostSearchedIds,
     mostViewedIds,
+    mostViewedComparisonsRaw,
     topSearchTerms,
     engagement,
   ] = await Promise.all([
@@ -226,8 +244,11 @@ async function getAdminActivityAnalyticsUncached(): Promise<AdminActivityAnalyti
     countSince("search_history", "created_at", since30),
     countSince("player_views", "viewed_at", since7),
     countSince("player_views", "viewed_at", since30),
+    countSince("comparison_views", "viewed_at", since7),
+    countSince("comparison_views", "viewed_at", since30),
     listMostSearchedPlayerIds({ limit: 8, windowDays: 30 }),
     listMostViewedPlayerIds({ limit: 8, windowDays: 30 }),
+    listMostViewedComparisons(8, 30),
     listTopSearchTerms({ limit: 8, windowDays: 30 }),
     getEngagementAnalytics(),
   ]);
@@ -247,8 +268,17 @@ async function getAdminActivityAnalyticsUncached(): Promise<AdminActivityAnalyti
     searchVolumeLast30Days,
     playerViewsLast7Days,
     playerViewsLast30Days,
+    comparisonViewsLast7Days,
+    comparisonViewsLast30Days,
     mostSearchedPlayers,
     mostViewedPlayers,
+    mostViewedComparisons: mostViewedComparisonsRaw.map((row) => ({
+      key: `${row.playerOneId}:${row.playerTwoId}`,
+      playerOneName: row.playerOneName,
+      playerTwoName: row.playerTwoName,
+      count: row.viewCount,
+      href: row.href,
+    })),
     topSearchTerms,
     engagement,
   };

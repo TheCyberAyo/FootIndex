@@ -39,6 +39,8 @@ export {
   listRecentMatches,
   listLiveScoreCards,
   listUpcomingMatches,
+  listMatchesForTeam,
+  listMatchesForCompetition,
 } from "@/services/matches/matches.service";
 
 export {
@@ -110,6 +112,27 @@ export {
   getCachedComparison,
   invalidateComparisonCacheForPlayer,
 } from "@/services/compare/comparison-cache.service";
+
+export {
+  recordComparisonView,
+  listMostViewedComparisons,
+  listRecentlyViewedComparisons,
+  mergeComparisonViewsForUser,
+} from "@/services/compare/comparison-views.service";
+export type { ComparisonViewPair } from "@/services/compare/comparison-views.service";
+
+export { getComparisonSummary } from "@/services/compare/ai-summary.service";
+
+export {
+  listUserFavorites,
+  addFavorite,
+  removeFavorite,
+  isFavorite,
+} from "@/services/favorites/favorites.service";
+export type { FavoriteItem } from "@/services/favorites/favorites.service";
+
+export { listCompetitionStandings } from "@/services/standings/standings.service";
+export type { CompetitionStandingRow } from "@/services/standings/standings.service";
 
 export { listSimilarPlayers } from "@/services/players/similar-players.service";
 export type { SimilarPlayerResult } from "@/services/players/similar-players.service";

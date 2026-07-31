@@ -1,4 +1,5 @@
 import { CompareBoard } from "@/components/compare/compare-board";
+import { ComparisonViewTracker } from "@/components/compare/comparison-view-tracker";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
 import {
@@ -63,6 +64,10 @@ export async function CompareRoutePage({
         ]}
       />
       <Breadcrumbs items={breadcrumbItems} />
+      <ComparisonViewTracker
+        playerOneId={playerOne.player.id}
+        playerTwoId={playerTwo.player.id}
+      />
       <CompareBoard
         playerOne={playerOne}
         playerTwo={playerTwo}

@@ -93,4 +93,11 @@ export const rootMetadata: Metadata = {
   applicationName: SITE_NAME,
   category: "sports",
   keywords: [...SITE_KEYWORDS],
+  ...(process.env.GOOGLE_SITE_VERIFICATION
+    ? {
+        verification: {
+          google: process.env.GOOGLE_SITE_VERIFICATION,
+        },
+      }
+    : {}),
 };

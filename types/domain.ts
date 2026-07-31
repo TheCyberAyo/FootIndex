@@ -174,3 +174,5 @@ export interface PageStubContent {
   description: string;
   highlights: string[];
 }
+
+export type FavoriteEntityType = "player" | "team" | "comparison";

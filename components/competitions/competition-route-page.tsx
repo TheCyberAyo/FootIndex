@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
 import { GlassCard } from "@/components/shared/glass-card";
+import { FixturesList } from "@/components/fixtures/fixtures-list";
+import { StandingsTable } from "@/components/fixtures/standings-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { Section } from "@/components/shared/section";
 import { competitionPath } from "@/lib/competitions/paths";
@@ -13,6 +15,8 @@ import {
   getCompetitionBySlug,
   listCompetitionLeaderboard,
 } from "@/services/competitions/competitions.service";
+import { listMatchesForCompetition } from "@/services/matches/matches.service";
+import { listCompetitionStandings } from "@/services/standings/standings.service";
 
 export async function createCompetitionMetadata(slug: string) {
   const competition = await getCompetitionBySlug(slug);
@@ -48,6 +52,8 @@ export async function CompetitionRoutePage({ slug }: CompetitionRoutePageProps) 
   }
 
   const leaderboard = await listCompetitionLeaderboard(slug);
+  const standings = await listCompetitionStandings(slug);
+  const fixtures = await listMatchesForCompetition(competition.name);
   const path = competitionPath(slug);
   const breadcrumbItems = [
     { name: "Home", path: "/" },
@@ -73,6 +79,17 @@ export async function CompetitionRoutePage({ slug }: CompetitionRoutePageProps) 
         title={competition.name}
         description="Aggregated goals and assists from synced season rows in our database."
       />
+
+      <Section
+        title="Team standings"
+        description="Aggregated team goal totals from synced season rows (proxy table — not official league points)."
+      >
+        <StandingsTable rows={standings} />
+      </Section>
+
+      <Section title="Fixtures" description="Recent matches in this competition.">
+        <FixturesList matches={fixtures} />
+      </Section>
 
       <Section title="Top scorers">
         <GlassCard className="overflow-hidden">

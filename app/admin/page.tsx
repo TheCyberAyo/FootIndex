@@ -30,8 +30,11 @@ export default async function AdminPage() {
     searchVolumeLast30Days: 0,
     playerViewsLast7Days: 0,
     playerViewsLast30Days: 0,
+    comparisonViewsLast7Days: 0,
+    comparisonViewsLast30Days: 0,
     mostSearchedPlayers: [],
     mostViewedPlayers: [],
+    mostViewedComparisons: [],
     topSearchTerms: [],
     engagement: EMPTY_ENGAGEMENT,
   } as Awaited<ReturnType<typeof adminGetActivityAnalytics>>;

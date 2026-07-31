@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { TeamSquad } from "@/components/teams/team-squad";
+import { FixturesList } from "@/components/fixtures/fixtures-list";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/shared/page-header";
@@ -11,6 +13,7 @@ import { createPageMetadata } from "@/lib/seo";
 import { createBreadcrumbJsonLd, createWebPageJsonLd } from "@/lib/seo/json-ld";
 import { teamPath } from "@/lib/teams/paths";
 import { getTeamBySlug, listPlayersByTeamId } from "@/services/teams/teams.service";
+import { listMatchesForTeam } from "@/services/matches/matches.service";
 import { SITE_URL } from "@/lib/constants";
 
 export async function createTeamMetadata(slug: string) {
@@ -64,6 +67,7 @@ export async function TeamRoutePage({ slug }: TeamRoutePageProps) {
   }
 
   const squad = await listPlayersByTeamId(team.id);
+  const fixtures = await listMatchesForTeam(team.id);
   const path = teamPath(slug);
   const typeLabel = team.team_type === "national" ? "National team" : "Club";
   const breadcrumbItems = [
@@ -92,6 +96,10 @@ export async function TeamRoutePage({ slug }: TeamRoutePageProps) {
         description={`${team.country} · ${squad.length} player${squad.length === 1 ? "" : "s"} in our database.`}
       />
 
+      <Section containerClassName="!py-0 -mt-6">
+        <FavoriteButton entityType="team" teamId={team.id} />
+      </Section>
+
       {team.logo_url ? (
         <Section containerClassName="!py-0 -mt-6">
           <Image
@@ -103,6 +111,13 @@ export async function TeamRoutePage({ slug }: TeamRoutePageProps) {
           />
         </Section>
       ) : null}
+
+      <Section
+        title="Fixtures"
+        description="Recent and upcoming matches involving this team."
+      >
+        <FixturesList matches={fixtures} />
+      </Section>
 
       <Section
         title="Current squad"

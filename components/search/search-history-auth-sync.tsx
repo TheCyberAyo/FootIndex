@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import { isSupabaseConfigured } from "@/lib/env";
 import { mergePlayerViewsSession } from "@/lib/players/views";
+import { mergeComparisonViewsSession } from "@/lib/compare/views";
 import { mergeSearchHistorySession } from "@/lib/search/session";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -22,6 +23,7 @@ export function SearchHistoryAuthSync() {
       await Promise.all([
         mergeSearchHistorySession(userId),
         mergePlayerViewsSession(userId),
+        mergeComparisonViewsSession(userId),
       ]);
     }
 

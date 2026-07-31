@@ -4,6 +4,7 @@ import { CompareMetricsList } from "@/components/compare/compare-metrics-list";
 import { CompareScoreboardCard } from "@/components/compare/compare-scoreboard";
 import { ComparePlayerPickerLazy } from "@/components/compare/compare-player-picker-lazy";
 import { CompareStickyHeader } from "@/components/compare/compare-sticky-header";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { ShareActions } from "@/components/shared/share-actions";
 import { CompareSummarySection } from "@/components/compare/compare-summary-section";
 import { YearCompareLazy } from "@/components/compare/year-compare-lazy";
@@ -70,6 +71,13 @@ export function CompareBoard({
           text={`Compare ${playerOne.player.name} and ${playerTwo.player.name} — goals, trophies, and head-to-head stats.`}
           className="mb-6"
         />
+        <div className="mb-6">
+          <FavoriteButton
+            entityType="comparison"
+            playerOneId={playerOne.player.id}
+            playerTwoId={playerTwo.player.id}
+          />
+        </div>
         <div className="mb-8">
           <CompareScoreboardCard
             scoreboard={comparison.scoreboard}

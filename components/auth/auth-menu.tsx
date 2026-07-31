@@ -71,6 +71,16 @@ export function AuthMenu({ compact = false }: AuthMenuProps) {
     return (
       <div className="flex items-center gap-2">
         {!compact ? (
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="hidden text-foreground/70 lg:inline-flex"
+          >
+            <Link href="/favorites">Favorites</Link>
+          </Button>
+        ) : null}
+        {!compact ? (
           <span className="hidden max-w-[140px] truncate text-xs text-foreground/50 lg:inline">
             {email}
           </span>

@@ -234,7 +234,7 @@ export function AdminAnalyticsSection({ analytics }: AdminAnalyticsSectionProps)
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <MetricCard
           label="Searches (7d)"
           value={analytics.searchVolumeLast7Days.toLocaleString()}
@@ -251,6 +251,14 @@ export function AdminAnalyticsSection({ analytics }: AdminAnalyticsSectionProps)
           label="Profile views (30d)"
           value={analytics.playerViewsLast30Days.toLocaleString()}
         />
+        <MetricCard
+          label="Comparison views (7d)"
+          value={analytics.comparisonViewsLast7Days.toLocaleString()}
+        />
+        <MetricCard
+          label="Comparison views (30d)"
+          value={analytics.comparisonViewsLast30Days.toLocaleString()}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -265,6 +273,34 @@ export function AdminAnalyticsSection({ analytics }: AdminAnalyticsSectionProps)
           emptyLabel="No profile views recorded yet."
         />
       </div>
+
+      <section className="space-y-3 rounded-xl border border-border bg-card p-6">
+        <h2 className="font-display text-xl font-semibold">Most viewed comparisons</h2>
+        {analytics.mostViewedComparisons.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No comparison views recorded yet.</p>
+        ) : (
+          <ol className="divide-y divide-border rounded-lg border border-border">
+            {analytics.mostViewedComparisons.map((row, index) => (
+              <li
+                key={row.key}
+                className="flex items-center justify-between gap-4 px-4 py-3"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="w-6 shrink-0 text-sm text-muted-foreground">
+                    {index + 1}
+                  </span>
+                  <Link href={row.href} className="truncate font-medium hover:underline">
+                    {row.playerOneName} vs {row.playerTwoName}
+                  </Link>
+                </div>
+                <span className="shrink-0 text-sm text-muted-foreground">
+                  {row.count.toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
 
       <section className="space-y-3 rounded-xl border border-border bg-card p-6">
         <h2 className="font-display text-xl font-semibold">Top search terms</h2>
