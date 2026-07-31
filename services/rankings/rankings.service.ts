@@ -3,6 +3,10 @@ import {
   getRankingCategory,
   type RankingCategory,
 } from "@/lib/rankings/categories";
+import {
+  playerMatchesRankingFilters,
+  type RankingFilters,
+} from "@/lib/rankings/filters";
 import { localCareerStats } from "@/lib/data/local-seed";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
@@ -116,17 +120,65 @@ async function listPlayersWithCareer(): Promise<
   });
 }
 
+async function getPlayerIdsMatchingSeasonFilters(
+  filters: RankingFilters,
+): Promise<Set<string> | null> {
+  if (!filters.competition && !filters.season) {
+    return null;
+  }
+
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
+
+  const supabase = createSupabasePublicClient();
+  let query = supabase.from("season_stats").select("player_id");
+
+  if (filters.competition) {
+    query = query.ilike(
+      "competition",
+      `%${filters.competition.replace(/[%_]/g, "")}%`,
+    );
+  }
+
+  if (filters.season) {
+    query = query.eq("season", filters.season);
+  }
+
+  const result = await query;
+  if (result.error) {
+    return new Set();
+  }
+
+  return new Set(
+    (result.data ?? [])
+      .map((row) => row.player_id)
+      .filter((playerId): playerId is string => Boolean(playerId)),
+  );
+}
+
 export async function getRanking(
   categorySlug: string,
+  filters?: RankingFilters,
 ): Promise<{ category: RankingCategory; entries: RankingEntry[] } | null> {
   const category = getRankingCategory(categorySlug);
   if (!category) {
     return null;
   }
 
+  const seasonPlayerIds = await getPlayerIdsMatchingSeasonFilters(filters ?? {});
+
   const rows = await listPlayersWithCareer();
   const scored = rows
     .map(({ player, career }) => {
+      if (!playerMatchesRankingFilters(player, filters)) {
+        return null;
+      }
+
+      if (seasonPlayerIds && !seasonPlayerIds.has(player.id)) {
+        return null;
+      }
+
       const value = resolveMetricValue(categorySlug, player, career);
       if (value == null) {
         return null;

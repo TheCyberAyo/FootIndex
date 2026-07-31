@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePlayerSearch } from "@/hooks/use-player-search";
 import { replaceComparePlayerPath } from "@/lib/compare/paths";
+import { recordSearchClick } from "@/lib/search/session";
 import type { PlayerSearchResult } from "@/types/domain";
 
 interface ComparePlayerPickerProps {
@@ -76,6 +77,10 @@ function ComparePlayerSlot({
   }, [close]);
 
   function pickResult(result: PlayerSearchResult) {
+    void recordSearchClick({
+      searchTerm: query.trim() || result.name,
+      playerId: result.id,
+    });
     onPick(side, result.slug);
     close();
   }

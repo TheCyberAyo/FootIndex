@@ -1,8 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 
+import { ShareActions } from "@/components/shared/share-actions";
+import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/container";
 import { teamPath } from "@/lib/teams/paths";
+import { absoluteUrl } from "@/lib/seo/routes";
+import { playerPath } from "@/lib/players/paths";
 import {
   formatHeight,
   formatPosition,
@@ -12,6 +16,7 @@ import type { PlayerProfile } from "@/types/domain";
 
 interface PlayerHeroProps {
   profile: PlayerProfile;
+  compareHref?: string;
 }
 
 /**
@@ -19,7 +24,7 @@ interface PlayerHeroProps {
  * Decision: photo as dominant plane when available; glass strip for identity
  * only (no floating badges/stat chips in the hero).
  */
-export function PlayerHero({ profile }: PlayerHeroProps) {
+export function PlayerHero({ profile, compareHref }: PlayerHeroProps) {
   const { player } = profile;
   const age = getPlayerAge(player.date_of_birth);
   const club = player.current_team?.name ?? "Free agent";
@@ -84,6 +89,23 @@ export function PlayerHero({ profile }: PlayerHeroProps) {
             ) : (
               <p className="font-medium text-white">{club}</p>
             )}
+          </div>
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            {compareHref ? (
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="border-white/20 bg-black/30 text-white hover:bg-white/10"
+              >
+                <Link href={compareHref}>Compare</Link>
+              </Button>
+            ) : null}
+            <ShareActions
+              url={absoluteUrl(playerPath(player.slug))}
+              title={`${player.name} career stats`}
+              text={`${player.name} — career goals, assists, trophies, and season stats on FootIndex.`}
+            />
           </div>
         </div>
       </Container>

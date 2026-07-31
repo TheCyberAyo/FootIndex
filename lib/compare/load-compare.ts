@@ -47,8 +47,21 @@ export async function loadCompareRouteData(
 export async function createCompareMetadata(
   playerOneSlug: string,
   playerTwoSlug: string,
+  options?: {
+    season?: string | null;
+    year?: string | null;
+  },
 ): Promise<Metadata> {
-  const path = comparePath(playerOneSlug, playerTwoSlug);
+  const basePath = comparePath(playerOneSlug, playerTwoSlug);
+  const params = new URLSearchParams();
+  if (options?.season?.trim()) {
+    params.set("season", options.season.trim());
+  }
+  if (options?.year?.trim()) {
+    params.set("year", options.year.trim());
+  }
+  const query = params.toString();
+  const path = query ? `${basePath}?${query}` : basePath;
 
   if (!isValidCompareSlugPair(playerOneSlug, playerTwoSlug)) {
     return createPageMetadata({
@@ -77,17 +90,20 @@ export async function createCompareMetadata(
   const nameTwo = playerTwo.player.name;
   const shortOne = playerOne.player.short_name;
   const shortTwo = playerTwo.player.short_name;
+  const seasonLabel = options?.season?.trim() || options?.year?.trim();
+  const titleSuffix = seasonLabel ? ` (${seasonLabel})` : "";
 
   return createPageMetadata({
-    title: `${shortOne} vs ${shortTwo} Career Comparison`,
-    description: `${nameOne} vs ${nameTwo} — career goals, club vs country, Champions League, trophies, and head-to-head stats.`,
+    title: `${shortOne} vs ${shortTwo} Career Comparison${titleSuffix}`,
+    description: `${nameOne} vs ${nameTwo}${seasonLabel ? ` — ${seasonLabel} season` : ""} — career goals, club vs country, Champions League, trophies, and head-to-head stats.`,
     path,
     keywords: [
       `${shortOne} vs ${shortTwo}`,
       `${nameOne} vs ${nameTwo}`,
       `${shortOne} vs ${shortTwo} stats`,
+      seasonLabel ? `${shortOne} vs ${shortTwo} ${seasonLabel}` : "",
       "football player comparison",
-    ],
+    ].filter(Boolean),
   });
 }
 

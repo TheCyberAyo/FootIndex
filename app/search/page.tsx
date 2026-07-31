@@ -1,22 +1,28 @@
 import { PlayerSearch } from "@/components/search/player-search";
-import { PlayerSearchResultsList } from "@/components/search/player-search-result";
-import { EmptyState } from "@/components/shared/empty-state";
-import { GlassCard } from "@/components/shared/glass-card";
 import { Section } from "@/components/shared/section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { createPageMetadata } from "@/lib/seo";
 import { createBreadcrumbJsonLd } from "@/lib/seo/json-ld";
-import { MIN_QUERY_LENGTH, searchPlayers } from "@/services";
+import { parseSearchFilters } from "@/lib/search/filters";
+import { MIN_QUERY_LENGTH, listMostSearchedPlayers } from "@/services";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 interface SearchPageProps {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    position?: string;
+    nationality?: string;
+    club?: string;
+    competition?: string;
+    ageMin?: string;
+    ageMax?: string;
+  }>;
 }
 
 export async function generateMetadata({ searchParams }: SearchPageProps) {
-  const { q } = await searchParams;
-  const query = q?.trim() ?? "";
+  const params = await searchParams;
+  const query = params.q?.trim() ?? "";
 
   if (query.length >= MIN_QUERY_LENGTH) {
     return createPageMetadata({
@@ -36,10 +42,10 @@ export async function generateMetadata({ searchParams }: SearchPageProps) {
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const { q } = await searchParams;
-  const query = q?.trim() ?? "";
-  const results =
-    query.length >= MIN_QUERY_LENGTH ? await searchPlayers(query, 25) : [];
+  const params = await searchParams;
+  const query = params.q?.trim() ?? "";
+  const initialFilters = parseSearchFilters(params);
+  const popularSearches = await listMostSearchedPlayers(8);
 
   return (
     <>
@@ -53,32 +59,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <Section
         eyebrow="Player search"
         title="Find any football player"
-        description="Instant autocomplete from the database — no external API calls during search."
+        description="Instant autocomplete from the database — filter by position, nationality, or club."
       >
-        <PlayerSearch variant="page" initialQuery={query} autoFocus />
+        <PlayerSearch
+          variant="page"
+          initialQuery={query}
+          initialFilters={initialFilters}
+          popularSearches={popularSearches}
+          autoFocus
+        />
       </Section>
-
-      {query.length >= MIN_QUERY_LENGTH ? (
-        <Section
-          title={`Results for “${query}”`}
-          description={
-            results.length === 1
-              ? "1 player found"
-              : `${results.length} players found`
-          }
-        >
-          {results.length === 0 ? (
-            <EmptyState
-              title="No players found"
-              description={`No players found for “${query}”. Try a different name, club, or nationality.`}
-            />
-          ) : (
-            <GlassCard className="overflow-hidden p-2">
-              <PlayerSearchResultsList results={results} />
-            </GlassCard>
-          )}
-        </Section>
-      ) : null}
     </>
   );
 }

@@ -95,3 +95,11 @@ export async function adminGetPipelineStats() {
     comparisonCacheEntries: cache.count ?? 0,
   };
 }
+
+export async function adminGetActivityAnalytics() {
+  assertAdminAccess();
+  const { getAdminActivityAnalytics } = await import(
+    "@/services/analytics/activity-analytics.service"
+  );
+  return getAdminActivityAnalytics();
+}

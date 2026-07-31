@@ -1,7 +1,6 @@
-import Link from "next/link";
-
 import { EmptyState } from "@/components/shared/empty-state";
 import { GlassCard } from "@/components/shared/glass-card";
+import { PrefetchLink } from "@/components/shared/prefetch-link";
 import { formatPosition } from "@/lib/players/format";
 import { playerPath } from "@/lib/players/paths";
 import type { RankingEntry } from "@/types/domain";
@@ -44,12 +43,12 @@ export function RankingTable({
                     {entry.rank}
                   </td>
                   <td className="px-3 py-3">
-                    <Link
+                    <PrefetchLink
                       href={playerPath(entry.player.slug)}
                       className="font-medium text-foreground hover:text-brand"
                     >
                       {entry.player.name}
-                    </Link>
+                    </PrefetchLink>
                   </td>
                   <td className="px-3 py-3">
                     {entry.player.current_team?.name ?? "—"}

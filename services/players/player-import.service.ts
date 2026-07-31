@@ -1,5 +1,6 @@
 import { STARTER_PLAYER_CATALOG } from "@/lib/data/starter-catalog";
 import { isSupabaseConfigured } from "@/lib/env";
+import { invalidatePlayerSearchCache } from "@/lib/search/cache";
 import { slugify } from "@/lib/slug";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { assertNoError, ServiceError } from "@/services/errors";
@@ -118,6 +119,8 @@ export async function importPlayerByApiId(
     synced = false;
   }
 
+  invalidatePlayerSearchCache();
+
   return { slug, apiFootballId, created, synced };
 }
 
@@ -184,6 +187,8 @@ export async function seedStarterPlayerCatalog(
       synced,
     });
   }
+
+  invalidatePlayerSearchCache();
 
   return results;
 }

@@ -47,7 +47,7 @@ export function PlayerProfileView({
 
   return (
     <>
-      <PlayerHero profile={profile} />
+      <PlayerHero profile={profile} compareHref={resolvedCompareHref} />
       <PlayerBio profile={profile} />
       <PlayerStatsGrid career={profile.career} />
       <PlayerClubHistory

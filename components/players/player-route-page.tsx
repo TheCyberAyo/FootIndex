@@ -1,4 +1,6 @@
 import { PlayerProfileView } from "@/components/players/player-profile-view";
+import { PlayerViewTracker } from "@/components/players/player-view-tracker";
+import { RecentlyViewedPlayers } from "@/components/players/recently-viewed-players";
 import { RelatedPlayers } from "@/components/players/related-players";
 import { SimilarPlayers } from "@/components/players/similar-players";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
@@ -31,7 +33,7 @@ export async function PlayerRoutePage({ slug }: PlayerRoutePageProps) {
   const path = playerPath(slug);
   const breadcrumbItems = [
     { name: "Home", path: "/" },
-    { name: "Players", path: "/search" },
+    { name: "Players", path: "/players" },
     { name: profile.player.short_name, path },
   ];
 
@@ -51,7 +53,9 @@ export async function PlayerRoutePage({ slug }: PlayerRoutePageProps) {
         ]}
       />
       <Breadcrumbs items={breadcrumbItems} />
+      <PlayerViewTracker playerId={profile.player.id} />
       <PlayerProfileView profile={profile} rival={rival} />
+      <RecentlyViewedPlayers excludeSlug={slug} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" />
       <SimilarPlayers currentSlug={slug} />
       <RelatedPlayers currentSlug={slug} />
     </>

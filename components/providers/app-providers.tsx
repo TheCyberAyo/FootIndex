@@ -1,9 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 
+import { PageViewTracker } from "@/components/analytics/page-view-tracker";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { SearchHistoryAuthSync } from "@/components/search/search-history-auth-sync";
+import { SearchSessionBootstrap } from "@/components/search/search-session-bootstrap";
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -16,7 +19,14 @@ interface AppProvidersProps {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <ThemeProvider>
-      <QueryProvider>{children}</QueryProvider>
+      <QueryProvider>
+        <SearchSessionBootstrap />
+        <SearchHistoryAuthSync />
+        <Suspense fallback={null}>
+          <PageViewTracker />
+        </Suspense>
+        {children}
+      </QueryProvider>
     </ThemeProvider>
   );
 }

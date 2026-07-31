@@ -61,7 +61,6 @@ export async function createPlayerMetadata(slug: string): Promise<Metadata> {
     title: `${player.name} Career Stats`,
     description,
     path,
-    imageUrl: player.image_url,
     ogType: "profile",
     keywords: [
       player.name,

@@ -73,15 +73,38 @@ export type { SyncablePlayer } from "@/services/sync/syncable-players";
 export {
   searchPlayers,
   listTrendingPlayers,
+  listMostSearchedPlayers,
   MIN_QUERY_LENGTH,
   SEARCH_DEFAULT_LIMIT,
 } from "@/services/search/search.service";
 
 export {
+  listPlayersCatalog,
+  PLAYERS_CATALOG_PAGE_SIZE,
+} from "@/services/players/players-catalog.service";
+export type { PlayersCatalogPage } from "@/services/players/players-catalog.service";
+
+export {
   recordSearchHistory,
   listRecentSearches,
+  listRecentSearchEntries,
   listRecentSearchTerms,
+  mergeSessionSearchHistory,
+  clearSearchHistory,
+  listMostSearchedPlayerIds,
 } from "@/services/search/search-history.service";
+export type {
+  SearchHistoryEntry,
+  MostSearchedPlayerRow,
+} from "@/services/search/search-history.service";
+
+export {
+  recordPlayerView,
+  listRecentlyViewedPlayers,
+  mergeSessionPlayerViews,
+  clearPlayerViews,
+} from "@/services/players/player-views.service";
+export type { RecentlyViewedPlayer } from "@/services/players/player-views.service";
 
 export {
   getCachedComparison,

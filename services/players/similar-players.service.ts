@@ -23,6 +23,7 @@ export interface SimilarPlayerResult {
   competition: string | null;
   careerGoals: number;
   score: number;
+  matchReasons: string[];
   href: string;
   compareHref: string;
 }
@@ -83,6 +84,50 @@ function scoreSimilarity(
   }
 
   return score;
+}
+
+function buildMatchReasons(
+  source: {
+    position: PlayerPosition;
+    nationality: string;
+    age: number;
+    goals: number;
+    competition: string | null;
+  },
+  candidate: CandidateRow,
+): string[] {
+  const reasons: string[] = [];
+  const candidateAge = getPlayerAge(candidate.date_of_birth);
+  const candidateGoals = candidate.career?.goals ?? 0;
+
+  if (candidate.position === source.position) {
+    reasons.push("Same position");
+  }
+
+  if (candidate.nationality === source.nationality) {
+    reasons.push("Same nationality");
+  }
+
+  if (
+    source.competition &&
+    candidate.latestCompetition &&
+    candidate.latestCompetition === source.competition
+  ) {
+    reasons.push("Same league");
+  }
+
+  if (Math.abs(candidateAge - source.age) <= 3) {
+    reasons.push("Similar age");
+  }
+
+  if (source.goals > 0 && candidateGoals > 0) {
+    const ratio = candidateGoals / source.goals;
+    if (ratio >= 0.5 && ratio <= 1.5) {
+      reasons.push("Similar scoring");
+    }
+  }
+
+  return reasons;
 }
 
 async function loadCandidates(
@@ -231,6 +276,7 @@ export async function listSimilarPlayers(
         competition: candidate.latestCompetition,
         careerGoals: candidate.career?.goals ?? 0,
         score: 0,
+        matchReasons: buildMatchReasons(source, candidate),
         href: playerPath(candidate.slug),
         compareHref: compareCanonicalPath(slug, candidate.slug),
       }));
@@ -251,6 +297,7 @@ export async function listSimilarPlayers(
     competition: candidate.latestCompetition,
     careerGoals: candidate.career?.goals ?? 0,
     score,
+    matchReasons: buildMatchReasons(source, candidate),
     href: playerPath(candidate.slug),
     compareHref: compareCanonicalPath(slug, candidate.slug),
   }));

@@ -1,6 +1,7 @@
 import { DEFAULT_SYNC_SEASON, RECENT_MATCHES_PER_PLAYER } from "@/lib/api-football/constants";
 import { isApiFootballConfigured } from "@/lib/api-football/client";
 import { getServerEnv, isSupabaseAdminConfigured } from "@/lib/env";
+import { invalidatePlayerSearchCache } from "@/lib/search/cache";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
   fetchPlayerById,
@@ -526,6 +527,8 @@ export async function runSyncJob(
       ...fixtureResults,
     };
   }
+
+  invalidatePlayerSearchCache();
 
   return {
     job,

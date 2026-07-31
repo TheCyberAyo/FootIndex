@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
 import { RankingTable } from "@/components/rankings/ranking-table";
 import { RankingsCategoryGrid } from "@/components/rankings/rankings-category-grid";
+import { RankingsFilterPanel } from "@/components/rankings/rankings-filter-panel";
 import { PageHeader } from "@/components/shared/page-header";
 import { Section } from "@/components/shared/section";
 import {
@@ -11,6 +12,7 @@ import {
   RANKING_CATEGORIES,
   rankingPath,
 } from "@/lib/rankings/categories";
+import { parseRankingFilters } from "@/lib/rankings/filters";
 import { createPageMetadata } from "@/lib/seo";
 import { createBreadcrumbJsonLd, createWebPageJsonLd } from "@/lib/seo/json-ld";
 import { getRanking } from "@/services/rankings/rankings.service";
@@ -24,6 +26,14 @@ export function generateStaticParams() {
 
 interface RankingsCategoryPageProps {
   params: Promise<{ category: string }>;
+  searchParams: Promise<{
+    position?: string;
+    nationality?: string;
+    competition?: string;
+    season?: string;
+    ageMin?: string;
+    ageMax?: string;
+  }>;
 }
 
 export async function generateMetadata({ params }: RankingsCategoryPageProps) {
@@ -49,9 +59,14 @@ export async function generateMetadata({ params }: RankingsCategoryPageProps) {
 
 export default async function RankingsCategoryPage({
   params,
+  searchParams,
 }: RankingsCategoryPageProps) {
-  const { category: categorySlug } = await params;
-  const result = await getRanking(categorySlug);
+  const [{ category: categorySlug }, query] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const filters = parseRankingFilters(query);
+  const result = await getRanking(categorySlug, filters);
 
   if (!result) {
     notFound();
@@ -85,6 +100,7 @@ export default async function RankingsCategoryPage({
       />
 
       <Section title="Leaderboard">
+        <RankingsFilterPanel initialFilters={filters} />
         <RankingTable
           entries={entries}
           metricLabel={category.metricLabel}

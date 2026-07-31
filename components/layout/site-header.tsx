@@ -1,14 +1,16 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
+import { Menu, Search, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { AuthMenu } from "@/components/auth/auth-menu";
+import { MobileSearchOverlay } from "@/components/search/mobile-search-overlay";
 import { PlayerSearch } from "@/components/search/player-search";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { useGlobalSearchShortcut } from "@/hooks/use-global-search-shortcut";
 import { featuredComparePath } from "@/lib/brand/featured-rivalry";
 import { PRIMARY_NAV, SITE_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -20,80 +22,29 @@ import { cn } from "@/lib/utils";
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  const openSearch = useCallback(() => {
+    setSearchOpen(true);
+    setOpen(false);
+  }, []);
+
+  useGlobalSearchShortcut(openSearch);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-        <Link
-          href="/"
-          className="font-display text-lg font-extrabold tracking-tight text-foreground"
-          onClick={() => setOpen(false)}
-        >
-          {SITE_NAME}
-          <span className="text-brand">.</span>
-        </Link>
-
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
-          {PRIMARY_NAV.map((item) => {
-            const active =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.href);
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  active
-                    ? "bg-white/10 text-brand"
-                    : "text-foreground/70 hover:bg-white/5 hover:text-foreground",
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <PlayerSearch variant="header" className="mx-2 hidden lg:block" />
-
-        <div className="hidden items-center gap-2 md:flex">
-          <ThemeToggle />
-          <AuthMenu />
-          <Button
-            asChild
-            variant="brand"
+    <>
+      <header className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+          <Link
+            href="/"
+            className="font-display text-lg font-extrabold tracking-tight text-foreground"
+            onClick={() => setOpen(false)}
           >
-            <Link href={`${featuredComparePath()}#vote`}>Vote</Link>
-          </Button>
-        </div>
+            {SITE_NAME}
+            <span className="text-brand">.</span>
+          </Link>
 
-        <div className="flex items-center gap-1 md:hidden">
-          <ThemeToggle />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="text-foreground"
-            aria-expanded={open}
-            aria-controls="mobile-nav"
-            aria-label={open ? "Close menu" : "Open menu"}
-            onClick={() => setOpen((value) => !value)}
-          >
-            {open ? <X /> : <Menu />}
-          </Button>
-        </div>
-      </div>
-
-      {open ? (
-        <nav
-          id="mobile-nav"
-          className="border-t border-border bg-background/95 px-4 py-4 md:hidden"
-          aria-label="Mobile"
-        >
-          <ul className="flex flex-col gap-1">
+          <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
             {PRIMARY_NAV.map((item) => {
               const active =
                 item.href === "/"
@@ -101,36 +52,108 @@ export function SiteHeader() {
                   : pathname.startsWith(item.href);
 
               return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "block rounded-lg px-3 py-3 text-base font-medium",
-                      active
-                        ? "bg-white/10 text-brand"
-                        : "text-foreground/80 hover:bg-white/5",
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    active
+                      ? "bg-white/10 text-brand"
+                      : "text-foreground/70 hover:bg-white/5 hover:text-foreground",
+                  )}
+                >
+                  {item.label}
+                </Link>
               );
             })}
-            <li className="flex items-center justify-between gap-2 pt-3">
-              <AuthMenu compact />
-              <Button
-                asChild
-                variant="brand"
-              >
-                <Link href={`${featuredComparePath()}#vote`} onClick={() => setOpen(false)}>
-                  Vote
-                </Link>
-              </Button>
-            </li>
-          </ul>
-        </nav>
+          </nav>
+
+          <PlayerSearch variant="header" className="mx-2 hidden min-w-0 flex-1 md:block lg:max-w-md" />
+
+          <div className="hidden items-center gap-2 md:flex">
+            <ThemeToggle />
+            <AuthMenu />
+            <Button asChild variant="brand">
+              <Link href={`${featuredComparePath()}#vote`}>Vote</Link>
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-1 md:hidden">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-foreground"
+              aria-label="Search players (⌘K)"
+              onClick={openSearch}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            <ThemeToggle />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-foreground"
+              aria-expanded={open}
+              aria-controls="mobile-nav"
+              aria-label={open ? "Close menu" : "Open menu"}
+              onClick={() => setOpen((value) => !value)}
+            >
+              {open ? <X /> : <Menu />}
+            </Button>
+          </div>
+        </div>
+
+        {open ? (
+          <nav
+            id="mobile-nav"
+            className="border-t border-border bg-background/95 px-4 py-4 md:hidden"
+            aria-label="Mobile"
+          >
+            <ul className="flex flex-col gap-1">
+              {PRIMARY_NAV.map((item) => {
+                const active =
+                  item.href === "/"
+                    ? pathname === "/"
+                    : pathname.startsWith(item.href);
+
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "block rounded-lg px-3 py-3 text-base font-medium",
+                        active
+                          ? "bg-white/10 text-brand"
+                          : "text-foreground/80 hover:bg-white/5",
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
+              <li className="flex items-center justify-between gap-2 pt-3">
+                <AuthMenu compact />
+                <Button asChild variant="brand">
+                  <Link
+                    href={`${featuredComparePath()}#vote`}
+                    onClick={() => setOpen(false)}
+                  >
+                    Vote
+                  </Link>
+                </Button>
+              </li>
+            </ul>
+          </nav>
+        ) : null}
+      </header>
+
+      {searchOpen ? (
+        <MobileSearchOverlay onClose={() => setSearchOpen(false)} />
       ) : null}
-    </header>
+    </>
   );
 }

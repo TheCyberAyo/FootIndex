@@ -26,9 +26,18 @@ export async function generateStaticParams() {
   return listPrerenderComparePairs();
 }
 
-export async function generateMetadata({ params }: CompareSlugPageProps) {
-  const { playerOne, playerTwo } = await params;
-  return createCompareMetadata(playerOne, playerTwo);
+export async function generateMetadata({
+  params,
+  searchParams,
+}: CompareSlugPageProps) {
+  const [{ playerOne, playerTwo }, query] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  return createCompareMetadata(playerOne, playerTwo, {
+    season: query.season,
+    year: query.year,
+  });
 }
 
 export default async function CompareSlugPage({

@@ -172,6 +172,41 @@ export type SearchHistoryRow = {
   created_at: string;
 }
 
+export type PlayerViewRow = {
+  id: string;
+  user_id: string | null;
+  session_id: string | null;
+  player_id: string;
+  viewed_at: string;
+}
+
+export type AnalyticsVisitorRow = {
+  visitor_id: string;
+  first_seen_at: string;
+  last_seen_at: string;
+  visit_count: number;
+}
+
+export type SitePageViewRow = {
+  id: string;
+  session_id: string;
+  visitor_id: string;
+  user_id: string | null;
+  path: string;
+  referrer: string | null;
+  is_returning: boolean;
+  created_at: string;
+}
+
+export type SiteNotFoundEventRow = {
+  id: string;
+  session_id: string | null;
+  visitor_id: string | null;
+  path: string;
+  referrer: string | null;
+  created_at: string;
+}
+
 export type CareerStatRow = {
   id: string;
   player_id: string;
@@ -777,6 +812,92 @@ export interface Database {
           session_id?: string | null;
           search_term?: string;
           player_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      player_views: {
+        Row: PlayerViewRow;
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          session_id?: string | null;
+          player_id: string;
+          viewed_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          session_id?: string | null;
+          player_id?: string;
+          viewed_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "player_views_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "players";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      analytics_visitors: {
+        Row: AnalyticsVisitorRow;
+        Insert: {
+          visitor_id: string;
+          first_seen_at?: string;
+          last_seen_at?: string;
+          visit_count?: number;
+        };
+        Update: {
+          visitor_id?: string;
+          first_seen_at?: string;
+          last_seen_at?: string;
+          visit_count?: number;
+        };
+        Relationships: [];
+      };
+      site_page_views: {
+        Row: SitePageViewRow;
+        Insert: {
+          id?: string;
+          session_id: string;
+          visitor_id: string;
+          user_id?: string | null;
+          path: string;
+          referrer?: string | null;
+          is_returning?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          visitor_id?: string;
+          user_id?: string | null;
+          path?: string;
+          referrer?: string | null;
+          is_returning?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      site_not_found_events: {
+        Row: SiteNotFoundEventRow;
+        Insert: {
+          id?: string;
+          session_id?: string | null;
+          visitor_id?: string | null;
+          path: string;
+          referrer?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string | null;
+          visitor_id?: string | null;
+          path?: string;
+          referrer?: string | null;
           created_at?: string;
         };
         Relationships: [];

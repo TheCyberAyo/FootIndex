@@ -1,6 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
-
+import { PrefetchLink } from "@/components/shared/prefetch-link";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { PlayerSearchResult } from "@/types/domain";
@@ -85,7 +84,7 @@ export function PlayerSearchResultItem({
   }
 
   return (
-    <Link
+    <PrefetchLink
       href={result.href}
       onClick={onSelect}
       className={itemClassName}
@@ -93,7 +92,7 @@ export function PlayerSearchResultItem({
       aria-selected={active}
     >
       {content}
-    </Link>
+    </PrefetchLink>
   );
 }
 

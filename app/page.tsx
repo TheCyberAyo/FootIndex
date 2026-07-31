@@ -21,7 +21,7 @@ import {
   getFeaturedRivalryProfiles,
   getTopScorersPreview,
   listLiveScoreCards,
-  listTrendingPlayers,
+  listMostSearchedPlayers,
 } from "@/services";
 import { RECENT_MATCHES_PER_PLAYER } from "@/lib/api-football/constants";
 
@@ -65,7 +65,7 @@ export default async function HomePage() {
     await Promise.all([
       getFeaturedRivalryProfiles(),
       listLiveScoreCards(),
-      listTrendingPlayers(9),
+      listMostSearchedPlayers(9),
       getTopScorersPreview(5),
     ]);
 
@@ -85,8 +85,8 @@ export default async function HomePage() {
 
       <Section
         eyebrow="Discover"
-        title="Players in the database"
-        description="Profiles are generated dynamically — add more via the starter catalog and sync."
+        title="Most searched players"
+        description="Popular profiles from recent search activity — falls back to top scorers when search data is sparse."
       >
         <TrendingPlayersGrid players={trending} />
         <div className="mt-6">

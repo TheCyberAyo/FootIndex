@@ -5,6 +5,7 @@ import {
 } from "@/lib/data/world-teams";
 import { DEFAULT_SYNC_SEASON } from "@/lib/api-football/constants";
 import { isSupabaseConfigured } from "@/lib/env";
+import { invalidatePlayerSearchCache } from "@/lib/search/cache";
 import { slugify } from "@/lib/slug";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { fetchTeamSquad } from "@/services/api-football/endpoints";
@@ -233,6 +234,8 @@ export async function importWorldSquads(
       await sleep(delayMs);
     }
   }
+
+  invalidatePlayerSearchCache();
 
   return {
     teamsProcessed: results.length,

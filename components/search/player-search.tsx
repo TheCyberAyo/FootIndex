@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2, Search, X } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -12,23 +12,37 @@ import {
   type KeyboardEvent,
 } from "react";
 
-import { recordSearchClick } from "@/lib/search/session";
 import { PlayerSearchResultsList } from "@/components/search/player-search-result";
+import { PopularSearches } from "@/components/search/popular-searches";
 import { RecentSearches } from "@/components/search/recent-searches";
+import { RecentlyViewedPlayers } from "@/components/players/recently-viewed-players";
+import { EmptyState } from "@/components/shared/empty-state";
+import { GlassCard } from "@/components/shared/glass-card";
+import { SearchFilters } from "@/components/search/search-filters";
 import { Input } from "@/components/ui/input";
 import { usePlayerSearch } from "@/hooks/use-player-search";
+import { recordSearchClick } from "@/lib/search/session";
+import {
+  buildSearchPath,
+  type PlayerSearchFilters,
+} from "@/lib/search/filters";
 import { cn } from "@/lib/utils";
 import type { PlayerSearchResult } from "@/types/domain";
 
-type PlayerSearchVariant = "hero" | "header" | "page";
+type PlayerSearchVariant = "hero" | "header" | "page" | "overlay";
 
 interface PlayerSearchProps {
   variant?: PlayerSearchVariant;
   trending?: PlayerSearchResult[];
+  popularSearches?: PlayerSearchResult[];
   initialQuery?: string;
+  initialFilters?: PlayerSearchFilters;
   autoFocus?: boolean;
   className?: string;
+  onClose?: () => void;
 }
+
+const PAGE_RESULTS_LIMIT = 25;
 
 const VARIANT_STYLES: Record<
   PlayerSearchVariant,
@@ -49,6 +63,11 @@ const VARIANT_STYLES: Record<
     input: "h-14 rounded-2xl px-12 text-lg",
     panel: "mt-3 rounded-2xl border border-border bg-background/95 backdrop-blur-xl",
   },
+  overlay: {
+    wrapper: "w-full",
+    input: "h-11 rounded-xl pl-10 text-base",
+    panel: "absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 max-h-[min(28rem,calc(100dvh-8rem))] overflow-y-auto rounded-xl border border-border bg-background shadow-xl",
+  },
 };
 
 /**
@@ -57,25 +76,67 @@ const VARIANT_STYLES: Record<
 export function PlayerSearch({
   variant = "page",
   trending = [],
+  popularSearches = [],
   initialQuery = "",
+  initialFilters,
   autoFocus = false,
   className,
+  onClose,
 }: PlayerSearchProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const listboxId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { query, setQuery, results, loading, error } = usePlayerSearch();
+  const [filters, setFilters] = useState<PlayerSearchFilters>(
+    initialFilters ?? {},
+  );
+  const { query, setQuery, results, loading, error } = usePlayerSearch({
+    limit: variant === "page" ? PAGE_RESULTS_LIMIT : undefined,
+    filters,
+  });
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [recentRefreshKey, setRecentRefreshKey] = useState(0);
   const styles = VARIANT_STYLES[variant];
+  const trimmedQuery = query.trim();
+  const isPageVariant = variant === "page";
+  const isDropdownVariant = variant === "header" || variant === "hero" || variant === "overlay";
 
   useEffect(() => {
     if (initialQuery) {
       setQuery(initialQuery);
-      setOpen(true);
+      if (isDropdownVariant) {
+        setOpen(true);
+      }
     }
-  }, [initialQuery, setQuery]);
+  }, [initialQuery, isDropdownVariant, setQuery]);
+
+  useEffect(() => {
+    setFilters(initialFilters ?? {});
+  }, [initialFilters]);
+
+  useEffect(() => {
+    if (!isPageVariant || pathname !== "/search") {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      const nextPath = buildSearchPath({
+        q: trimmedQuery.length >= 2 ? trimmedQuery : undefined,
+        filters,
+      });
+      const currentPath = `${window.location.pathname}${window.location.search}`;
+
+      if (currentPath !== nextPath) {
+        router.replace(nextPath, { scroll: false });
+      }
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [filters, isPageVariant, pathname, router, trimmedQuery]);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -93,21 +154,29 @@ export function PlayerSearch({
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [close]);
 
+  const trackSearch = useCallback(
+    async (input: { searchTerm: string; playerId?: string }) => {
+      await recordSearchClick(input);
+      setRecentRefreshKey((key) => key + 1);
+    },
+    [],
+  );
+
   const navigateToResult = useCallback(
     (result: PlayerSearchResult) => {
       close();
-      void recordSearchClick({
-        searchTerm: query.trim() || result.name,
+      void trackSearch({
+        searchTerm: trimmedQuery || result.name,
         playerId: result.id,
       });
+      onClose?.();
       router.push(result.href);
     },
-    [close, query, router],
+    [close, onClose, router, trackSearch, trimmedQuery],
   );
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const trimmed = query.trim();
 
     if (activeIndex >= 0 && results[activeIndex]) {
       navigateToResult(results[activeIndex]);
@@ -119,9 +188,10 @@ export function PlayerSearch({
       return;
     }
 
-    if (trimmed.length >= 2) {
+    if (trimmedQuery.length >= 2) {
       close();
-      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+      void trackSearch({ searchTerm: trimmedQuery });
+      router.push(buildSearchPath({ q: trimmedQuery, filters }));
     }
   };
 
@@ -147,6 +217,9 @@ export function PlayerSearch({
 
     if (event.key === "Escape") {
       close();
+      if (variant === "overlay") {
+        onClose?.();
+      }
       return;
     }
 
@@ -156,8 +229,12 @@ export function PlayerSearch({
     }
   };
 
-  const showPanel =
-    open && (loading || error != null || query.trim().length >= 2 || results.length > 0);
+  const showDropdown =
+    isDropdownVariant &&
+    open &&
+    (loading || error != null || trimmedQuery.length >= 2 || results.length > 0);
+
+  const showPageResults = isPageVariant && trimmedQuery.length >= 2;
 
   return (
     <div ref={containerRef} className={cn("relative", styles.wrapper, className)}>
@@ -179,17 +256,25 @@ export function PlayerSearch({
             autoComplete="off"
             spellCheck={false}
             placeholder="Search any football player…"
-            aria-controls={showPanel ? `${listboxId}-listbox` : undefined}
-            aria-expanded={showPanel}
+            aria-controls={
+              showDropdown || showPageResults ? `${listboxId}-listbox` : undefined
+            }
+            aria-expanded={showDropdown || showPageResults}
             aria-autocomplete="list"
             role="combobox"
             className={styles.input}
             onChange={(event) => {
               setQuery(event.target.value);
-              setOpen(true);
+              if (isDropdownVariant) {
+                setOpen(true);
+              }
               setActiveIndex(-1);
             }}
-            onFocus={() => setOpen(true)}
+            onFocus={() => {
+              if (isDropdownVariant) {
+                setOpen(true);
+              }
+            }}
             onKeyDown={handleKeyDown}
           />
           {query ? (
@@ -200,6 +285,9 @@ export function PlayerSearch({
               onClick={() => {
                 setQuery("");
                 setActiveIndex(-1);
+                if (isPageVariant && pathname === "/search") {
+                  router.replace("/search", { scroll: false });
+                }
                 inputRef.current?.focus();
               }}
             >
@@ -209,6 +297,14 @@ export function PlayerSearch({
         </div>
       </form>
 
+      {isPageVariant ? (
+        <SearchFilters
+          filters={filters}
+          onChange={setFilters}
+          className="mt-4"
+        />
+      ) : null}
+
       {trending.length > 0 && variant === "hero" ? (
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           {trending.map((player) => (
@@ -216,7 +312,13 @@ export function PlayerSearch({
               key={player.id}
               type="button"
               className="rounded-full border border-white/15 bg-black/30 px-3 py-1.5 text-sm text-white/80 backdrop-blur-sm transition-colors hover:border-brand/40 hover:text-white"
-              onClick={() => router.push(player.href)}
+              onClick={() => {
+                void recordSearchClick({
+                  searchTerm: player.name,
+                  playerId: player.id,
+                });
+                router.push(player.href);
+              }}
             >
               {player.shortName}
             </button>
@@ -224,10 +326,13 @@ export function PlayerSearch({
         </div>
       ) : null}
 
-      {showPanel ? (
+      {showDropdown ? (
         <div
           id={`${listboxId}-listbox`}
-          className={cn(styles.panel, variant === "header" ? "" : "overflow-hidden")}
+          className={cn(
+            styles.panel,
+            variant === "header" || variant === "overlay" ? "" : "overflow-hidden",
+          )}
         >
           {loading ? (
             <div className="flex items-center gap-2 px-4 py-4 text-sm text-foreground/60">
@@ -236,7 +341,7 @@ export function PlayerSearch({
             </div>
           ) : error ? (
             <p className="px-4 py-4 text-sm text-destructive">{error}</p>
-          ) : query.trim().length < 2 ? (
+          ) : trimmedQuery.length < 2 ? (
             <p className="px-4 py-4 text-sm text-foreground/60">
               Type at least 2 characters to search.
             </p>
@@ -245,20 +350,70 @@ export function PlayerSearch({
               results={results}
               activeIndex={activeIndex}
               onSelect={close}
-              emptyMessage={`No players found for “${query.trim()}”.`}
+              onPick={navigateToResult}
+              emptyMessage={`No players found for “${trimmedQuery}”.`}
             />
           )}
         </div>
       ) : null}
 
-      {variant === "page" ? (
-        <RecentSearches
+      {isPageVariant && trimmedQuery.length < 2 ? (
+        <>
+          <RecentSearches
+            refreshKey={recentRefreshKey}
           onSelect={(term) => {
             setQuery(term);
-            setOpen(true);
+            if (pathname === "/search") {
+              router.replace(
+                buildSearchPath({ q: term, filters }),
+                { scroll: false },
+              );
+            }
             inputRef.current?.focus();
           }}
-        />
+          />
+          <PopularSearches players={popularSearches} className="mt-4" />
+          <RecentlyViewedPlayers />
+        </>
+      ) : null}
+
+      {showPageResults ? (
+        <div id={`${listboxId}-listbox`} className="mt-8 space-y-4">
+          <div>
+            <h2 className="text-xl font-semibold text-foreground">
+              Results for “{trimmedQuery}”
+            </h2>
+            {!loading && !error ? (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {results.length === 1
+                  ? "1 player found"
+                  : `${results.length} players found`}
+              </p>
+            ) : null}
+          </div>
+
+          {loading ? (
+            <div className="flex items-center gap-2 py-8 text-sm text-foreground/60">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              Searching…
+            </div>
+          ) : error ? (
+            <p className="py-8 text-sm text-destructive">{error}</p>
+          ) : results.length === 0 ? (
+            <EmptyState
+              title="No players found"
+              description={`No players found for “${trimmedQuery}”. Try a different name, club, or nationality.`}
+            />
+          ) : (
+            <GlassCard className="overflow-hidden p-2">
+              <PlayerSearchResultsList
+                results={results}
+                onPick={navigateToResult}
+                emptyMessage={`No players found for “${trimmedQuery}”.`}
+              />
+            </GlassCard>
+          )}
+        </div>
       ) : null}
     </div>
   );
