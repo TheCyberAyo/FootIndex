@@ -35,6 +35,7 @@ export const AD_EXCLUDED_PATH_PREFIXES = [
   "/admin",
   "/login",
   "/sign-up",
+  "/account",
   "/auth/",
   "/api-docs",
 ] as const;

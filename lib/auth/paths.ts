@@ -1,6 +1,6 @@
 export type AuthMode = "sign-in" | "sign-up";
 
-const DEFAULT_NEXT = "/favorites";
+const DEFAULT_NEXT = "/account";
 
 /** Safe internal redirect target from ?next= query param. */
 export function resolveAuthNextPath(next: string | undefined | null): string {

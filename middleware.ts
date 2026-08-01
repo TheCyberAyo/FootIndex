@@ -62,6 +62,7 @@ export const config = {
     "/compare/:path*",
     "/login",
     "/sign-up",
+    "/account",
     "/favorites",
     "/search",
     "/player/:path*",

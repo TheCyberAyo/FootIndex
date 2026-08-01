@@ -42,7 +42,7 @@ function GoogleIcon() {
 }
 
 export function LoginForm({
-  nextPath = "/favorites",
+  nextPath = "/account",
   onSuccessMessage,
 }: LoginFormProps) {
   const [email, setEmail] = useState("");

@@ -24,7 +24,7 @@ interface AuthDialogProps {
 export function AuthDialog({
   open,
   onClose,
-  nextPath = "/favorites",
+  nextPath = "/account",
   intent = "default",
 }: AuthDialogProps) {
   const copy = getAuthDialogCopy(intent);

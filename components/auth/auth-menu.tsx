@@ -23,6 +23,7 @@ export function AuthMenu({ compact = false }: AuthMenuProps) {
     const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
+    router.push("/");
     router.refresh();
   }
 
@@ -47,6 +48,14 @@ export function AuthMenu({ compact = false }: AuthMenuProps) {
   if (email) {
     return (
       <div className="flex items-center gap-2">
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="text-foreground/70"
+        >
+          <Link href="/account">{compact ? "Account" : "Account"}</Link>
+        </Button>
         {!compact ? (
           <Button
             asChild
