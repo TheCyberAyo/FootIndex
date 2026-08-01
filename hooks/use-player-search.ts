@@ -10,12 +10,15 @@ interface UsePlayerSearchOptions {
   debounceMs?: number;
   limit?: number;
   filters?: PlayerSearchFilters;
+  /** Restrict results to the marquee compare catalog. */
+  compareEligible?: boolean;
 }
 
 export function usePlayerSearch({
   debounceMs = 200,
   limit,
   filters,
+  compareEligible = false,
 }: UsePlayerSearchOptions = {}) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlayerSearchResult[]>([]);
@@ -62,6 +65,9 @@ export function usePlayerSearch({
         if (filters?.ageMax != null) {
           params.set("ageMax", String(filters.ageMax));
         }
+        if (compareEligible) {
+          params.set("compareEligible", "1");
+        }
 
         const response = await fetch(`/api/search?${params.toString()}`, {
           signal: controller.signal,
@@ -91,7 +97,7 @@ export function usePlayerSearch({
       window.clearTimeout(timer);
       abortRef.current?.abort();
     };
-  }, [query, debounceMs, limit, filters]);
+  }, [query, debounceMs, limit, filters, compareEligible]);
 
   const reset = useCallback(() => {
     setQuery("");

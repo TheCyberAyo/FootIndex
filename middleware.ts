@@ -61,6 +61,8 @@ export const config = {
     "/compare",
     "/compare/:path*",
     "/login",
+    "/sign-up",
+    "/favorites",
     "/search",
     "/player/:path*",
     "/stats",

@@ -9,10 +9,10 @@ export interface CompareMetricDefinition {
 }
 
 export interface CompareMetric extends CompareMetricDefinition {
-  playerOneValue: number;
-  playerTwoValue: number;
+  playerOneValue: number | null;
+  playerTwoValue: number | null;
   winner: MetricWinner;
-  delta: number;
+  delta: number | null;
 }
 
 export interface CompareScoreboard {

@@ -15,6 +15,7 @@ import { PlayerVideosPlaceholder } from "@/components/players/player-videos-plac
 import { Section } from "@/components/shared/section";
 import { Button } from "@/components/ui/button";
 import { compareCanonicalPath, defaultComparePath } from "@/lib/compare";
+import { isComparePairReady, isCompareReady } from "@/lib/compare/readiness";
 import { playerPath } from "@/lib/players/paths";
 import { buildCareerTimeline } from "@/lib/players/timeline";
 import type { PlayerProfile } from "@/types/domain";
@@ -33,11 +34,18 @@ export function PlayerProfileView({
   rival,
   compareHref,
 }: PlayerProfileViewProps) {
-  const resolvedCompareHref =
-    compareHref ??
-    (rival
-      ? compareCanonicalPath(profile.player.slug, rival.player.slug)
-      : defaultComparePath());
+  const resolvedCompareHref = (() => {
+    if (compareHref) {
+      return compareHref;
+    }
+    if (rival && isComparePairReady(profile, rival)) {
+      return compareCanonicalPath(profile.player.slug, rival.player.slug);
+    }
+    if (isCompareReady(profile)) {
+      return defaultComparePath();
+    }
+    return undefined;
+  })();
   const timeline = buildCareerTimeline({
     trophies: profile.trophies,
     awards: profile.awards,
@@ -49,7 +57,7 @@ export function PlayerProfileView({
     <>
       <PlayerHero profile={profile} compareHref={resolvedCompareHref} />
       <PlayerBio profile={profile} />
-      <PlayerStatsGrid career={profile.career} />
+      <PlayerStatsGrid career={profile.career} slug={profile.player.slug} />
       <PlayerClubHistory
         seasons={profile.seasons}
         trophies={profile.trophies}
@@ -80,12 +88,11 @@ export function PlayerProfileView({
 
       <Section title="Keep exploring">
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Button
-            asChild
-            variant="brand"
-          >
-            <Link href={resolvedCompareHref}>Compare Players</Link>
-          </Button>
+          {resolvedCompareHref ? (
+            <Button asChild variant="brand">
+              <Link href={resolvedCompareHref}>Compare Players</Link>
+            </Button>
+          ) : null}
           <Button
             asChild
             variant="outline"

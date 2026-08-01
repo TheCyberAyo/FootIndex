@@ -1,4 +1,5 @@
 import { defaultComparePath } from "@/lib/compare/paths";
+import { isComparePairReady } from "@/lib/compare/readiness";
 import { competitionPath } from "@/lib/competitions/paths";
 import { CURATED_NEWS } from "@/lib/data/news";
 import { playerPath } from "@/lib/players/paths";
@@ -6,11 +7,12 @@ import { RANKING_CATEGORIES } from "@/lib/rankings/categories";
 import {
   comparePairPriority,
   comparePairToPath,
-  listPrerenderComparePairs,
+  listCuratedPlayerSlugs,
+  listMarqueeComparePairs,
 } from "@/lib/seo/prerender";
 import { teamPath } from "@/lib/teams/paths";
 import { listCompetitions } from "@/services/competitions/competitions.service";
-import { listPlayers, listTeams } from "@/services";
+import { getPlayerProfileBySlug, listPlayers, listTeams } from "@/services";
 
 import type { SitemapEntry } from "@/lib/seo/routes";
 
@@ -51,9 +53,25 @@ export async function listPlayerSitemapEntries(): Promise<SitemapEntry[]> {
  * PROJECT_SPECIFICATION §87 — Comparison Sitemap (split when exceeding limits).
  */
 export async function listCompareSitemapEntries(): Promise<SitemapEntry[]> {
-  const pairs = await listPrerenderComparePairs();
+  const pairs = listMarqueeComparePairs(listCuratedPlayerSlugs());
+  const readyPairs: typeof pairs = [];
 
-  return pairs.map((pair) => ({
+  for (const pair of pairs) {
+    const [playerOne, playerTwo] = await Promise.all([
+      getPlayerProfileBySlug(pair.playerOne),
+      getPlayerProfileBySlug(pair.playerTwo),
+    ]);
+
+    if (
+      playerOne &&
+      playerTwo &&
+      isComparePairReady(playerOne, playerTwo)
+    ) {
+      readyPairs.push(pair);
+    }
+  }
+
+  return readyPairs.map((pair) => ({
     path: comparePairToPath(pair),
     changeFrequency: "weekly" as const,
     priority: comparePairPriority(pair.playerOne, pair.playerTwo),

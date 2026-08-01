@@ -262,6 +262,7 @@ export function CommentsPanel({
         open={authOpen}
         onClose={() => setAuthOpen(false)}
         nextPath={nextPath}
+        intent="comment"
       />
     </>
   );

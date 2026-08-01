@@ -1,10 +1,13 @@
 import { GlassCard } from "@/components/shared/glass-card";
 import { Section } from "@/components/shared/section";
 import { formatGoalsPerGame, formatStat } from "@/lib/players/format";
+import { hasCuratedCareer } from "@/lib/players/curated";
+import { CAREER_BASELINE_AS_OF } from "@/lib/data/career-baselines";
 import type { CareerStats } from "@/types/domain";
 
 interface PlayerStatsGridProps {
   career: CareerStats | null;
+  slug: string;
 }
 
 interface StatItem {
@@ -12,7 +15,12 @@ interface StatItem {
   value: string;
 }
 
-export function PlayerStatsGrid({ career }: PlayerStatsGridProps) {
+export function PlayerStatsGrid({ career, slug }: PlayerStatsGridProps) {
+  const description = hasCuratedCareer(slug)
+    ? `Verified career baseline as of ${CAREER_BASELINE_AS_OF}.`
+    : career
+      ? "Totals roll up from synced season lines in Supabase."
+      : "Career stats are not synced yet for this player.";
   const items: StatItem[] = [
     { label: "Career Goals", value: formatStat(career?.goals) },
     { label: "Assists", value: formatStat(career?.assists) },
@@ -40,7 +48,7 @@ export function PlayerStatsGrid({ career }: PlayerStatsGridProps) {
       id="career"
       eyebrow="Career"
       title="Career stats"
-      description="Totals roll up from synced season lines in Supabase."
+      description={description}
     >
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((item) => (

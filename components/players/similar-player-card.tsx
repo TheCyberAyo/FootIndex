@@ -64,7 +64,11 @@ export function SimilarPlayerCard({ player }: SimilarPlayerCardProps) {
         variant="outline"
         className="mt-4 border-white/15 bg-transparent text-white hover:bg-white/10"
       >
-        <PrefetchLink href={player.compareHref}>Compare stats</PrefetchLink>
+        {player.compareHref ? (
+          <PrefetchLink href={player.compareHref}>Compare stats</PrefetchLink>
+        ) : (
+          <PrefetchLink href={player.href}>View profile</PrefetchLink>
+        )}
       </Button>
     </li>
   );

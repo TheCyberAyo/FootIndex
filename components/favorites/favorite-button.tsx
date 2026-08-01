@@ -1,12 +1,13 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { AuthDialog } from "@/components/auth/auth-dialog";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 import { isSupabaseConfigured } from "@/lib/env";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { FavoriteEntityType } from "@/types/domain";
 import { cn } from "@/lib/utils";
 
@@ -29,34 +30,22 @@ export function FavoriteButton({
   className,
   size = "sm",
 }: FavoriteButtonProps) {
+  const pathname = usePathname();
+  const { user, loading: authLoading, configured } = useAuth();
   const [active, setActive] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [signedIn, setSignedIn] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
 
   useEffect(() => {
-    if (!isSupabaseConfigured()) {
+    if (!configured || !user) {
       setLoading(false);
+      setActive(false);
       return;
     }
 
-    const supabase = createSupabaseBrowserClient();
     let cancelled = false;
 
     async function loadState() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (cancelled) {
-        return;
-      }
-
-      setSignedIn(Boolean(user));
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
       const params = new URLSearchParams({ entityType });
       if (playerId) {
         params.set("playerId", playerId);
@@ -85,22 +74,24 @@ export function FavoriteButton({
       }
     }
 
+    setLoading(true);
     void loadState();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      void loadState();
-    });
 
     return () => {
       cancelled = true;
-      subscription.unsubscribe();
     };
-  }, [entityType, playerId, teamId, playerOneId, playerTwoId]);
+  }, [
+    configured,
+    user,
+    entityType,
+    playerId,
+    teamId,
+    playerOneId,
+    playerTwoId,
+  ]);
 
   async function toggleFavorite() {
-    if (!signedIn) {
+    if (!user) {
       return;
     }
 
@@ -131,19 +122,30 @@ export function FavoriteButton({
     return null;
   }
 
-  if (!signedIn) {
+  if (!user) {
     return (
-      <Button
-        asChild
-        variant="outline"
-        size={size}
-        className={cn(
-          "border-white/20 bg-black/30 text-white hover:bg-white/10",
-          className,
-        )}
-      >
-        <Link href="/login">Save</Link>
-      </Button>
+      <>
+        <Button
+          type="button"
+          variant="outline"
+          size={size}
+          disabled={authLoading}
+          onClick={() => setAuthOpen(true)}
+          className={cn(
+            "border-white/20 bg-black/30 text-white hover:bg-white/10",
+            className,
+          )}
+        >
+          <Heart className="size-4" />
+          Save
+        </Button>
+        <AuthDialog
+          open={authOpen}
+          onClose={() => setAuthOpen(false)}
+          nextPath={pathname}
+          intent="favorite"
+        />
+      </>
     );
   }
 

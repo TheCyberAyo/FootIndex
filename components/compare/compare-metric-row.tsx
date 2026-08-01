@@ -21,9 +21,13 @@ export function CompareMetricRow({ metric }: CompareMetricRowProps) {
     metric.format,
   );
 
-  const max = Math.max(metric.playerOneValue, metric.playerTwoValue, 1);
-  const playerOneWidth = Math.round((metric.playerOneValue / max) * 100);
-  const playerTwoWidth = Math.round((metric.playerTwoValue / max) * 100);
+  const max = Math.max(
+    metric.playerOneValue ?? 0,
+    metric.playerTwoValue ?? 0,
+    1,
+  );
+  const playerOneWidth = Math.round(((metric.playerOneValue ?? 0) / max) * 100);
+  const playerTwoWidth = Math.round(((metric.playerTwoValue ?? 0) / max) * 100);
 
   return (
     <article className="rounded-2xl border border-glass-border bg-glass px-4 py-4 backdrop-blur-xl sm:px-5">
@@ -31,12 +35,16 @@ export function CompareMetricRow({ metric }: CompareMetricRowProps) {
         <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
           {metric.label}
         </p>
-        {metric.winner !== "tie" ? (
+        {metric.winner !== "tie" && metric.delta != null ? (
           <p className="mt-1 text-[11px] text-brand">
             Δ {formatCompareValue(metric.delta, metric.format)}
           </p>
         ) : (
-          <p className="mt-1 text-[11px] text-white/35">Tied</p>
+          <p className="mt-1 text-[11px] text-white/35">
+            {metric.playerOneValue == null || metric.playerTwoValue == null
+              ? "Unavailable"
+              : "Tied"}
+          </p>
         )}
       </div>
 
@@ -65,12 +73,16 @@ export function CompareMetricRow({ metric }: CompareMetricRowProps) {
           <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
             {metric.label}
           </p>
-          {metric.winner !== "tie" ? (
+          {metric.winner !== "tie" && metric.delta != null ? (
             <p className="mt-1 text-[11px] text-white/35">
               Lead by {formatCompareValue(metric.delta, metric.format)}
             </p>
           ) : (
-            <p className="mt-1 text-[11px] text-white/35">Even</p>
+            <p className="mt-1 text-[11px] text-white/35">
+              {metric.playerOneValue == null || metric.playerTwoValue == null
+                ? "Unavailable"
+                : "Even"}
+            </p>
           )}
         </div>
 

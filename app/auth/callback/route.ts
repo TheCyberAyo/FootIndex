@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { resolveAuthNextPath } from "@/lib/auth/paths";
 import { isSupabaseConfigured } from "@/lib/env";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 /**
  * Exchange auth code for session cookies (magic link + OAuth).
@@ -9,8 +10,7 @@ import { isSupabaseConfigured } from "@/lib/env";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const nextParam = url.searchParams.get("next") ?? "/compare#vote";
-  const next = nextParam.startsWith("/") ? nextParam : "/compare#vote";
+  const next = resolveAuthNextPath(url.searchParams.get("next"));
 
   if (!isSupabaseConfigured()) {
     return NextResponse.redirect(new URL("/login?error=config", url.origin));
@@ -21,8 +21,12 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
+      const params = new URLSearchParams({
+        error: error.message,
+        next,
+      });
       return NextResponse.redirect(
-        new URL(`/login?error=${encodeURIComponent(error.message)}`, url.origin),
+        new URL(`/login?${params.toString()}`, url.origin),
       );
     }
   }

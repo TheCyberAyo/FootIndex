@@ -50,14 +50,19 @@ const BAR_KEYS = [
   "awards",
 ] as const;
 
-function normalizePair(a: number, b: number): { a: number; b: number } {
-  const max = Math.max(a, b, 0);
+function normalizePair(
+  a: number | null,
+  b: number | null,
+): { a: number; b: number } {
+  const left = a ?? 0;
+  const right = b ?? 0;
+  const max = Math.max(left, right, 0);
   if (max <= 0) {
     return { a: 0, b: 0 };
   }
   return {
-    a: Math.round((a / max) * 100),
-    b: Math.round((b / max) * 100),
+    a: Math.round((left / max) * 100),
+    b: Math.round((right / max) * 100),
   };
 }
 
@@ -88,8 +93,8 @@ export function buildBarSeries(metrics: CompareMetric[]): BarPoint[] {
     .filter((metric) => (BAR_KEYS as readonly string[]).includes(metric.key))
     .map((metric) => ({
       metric: metric.label.replace("Champions League Goals", "UCL Goals"),
-      playerOne: metric.playerOneValue,
-      playerTwo: metric.playerTwoValue,
+      playerOne: metric.playerOneValue ?? 0,
+      playerTwo: metric.playerTwoValue ?? 0,
     }));
 }
 

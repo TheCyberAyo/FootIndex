@@ -227,6 +227,7 @@ export function VotePanel({
           setPendingChoice(null);
         }}
         nextPath={nextPath}
+        intent="vote"
       />
     </>
   );

@@ -7,6 +7,7 @@ import {
   comparePath,
   isValidCompareSlugPair,
 } from "@/lib/compare/paths";
+import { isComparePairReady } from "@/lib/compare/readiness";
 import { isValidPlayerSlugFormat } from "@/lib/players/paths";
 import { createPageMetadata } from "@/lib/seo";
 import { getPlayerProfileBySlug } from "@/services";
@@ -92,11 +93,13 @@ export async function createCompareMetadata(
   const shortTwo = playerTwo.player.short_name;
   const seasonLabel = options?.season?.trim() || options?.year?.trim();
   const titleSuffix = seasonLabel ? ` (${seasonLabel})` : "";
+  const pairReady = isComparePairReady(playerOne, playerTwo);
 
   return createPageMetadata({
     title: `${shortOne} vs ${shortTwo} Career Comparison${titleSuffix}`,
     description: `${nameOne} vs ${nameTwo}${seasonLabel ? ` — ${seasonLabel} season` : ""} — career goals, club vs country, Champions League, trophies, and head-to-head stats.`,
     path,
+    noIndex: !pairReady,
     keywords: [
       `${shortOne} vs ${shortTwo}`,
       `${nameOne} vs ${nameTwo}`,

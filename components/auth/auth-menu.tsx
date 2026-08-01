@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { isSupabaseConfigured } from "@/lib/env";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
+import { loginPath, signUpPath } from "@/lib/auth/paths";
 
 interface AuthMenuProps {
   compact?: boolean;
@@ -14,43 +13,21 @@ interface AuthMenuProps {
 
 export function AuthMenu({ compact = false }: AuthMenuProps) {
   const router = useRouter();
-  const [email, setEmail] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!isSupabaseConfigured()) {
-      setLoading(false);
-      return;
-    }
-
-    const supabase = createSupabaseBrowserClient();
-
-    void supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? null);
-      setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setEmail(session?.user?.email ?? null);
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  const { email, loading, configured } = useAuth();
 
   async function handleSignOut() {
-    if (!isSupabaseConfigured()) {
+    if (!configured) {
       return;
     }
 
+    const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
-    setEmail(null);
     router.refresh();
+  }
+
+  if (!configured) {
+    return null;
   }
 
   if (loading) {
@@ -89,7 +66,7 @@ export function AuthMenu({ compact = false }: AuthMenuProps) {
           type="button"
           variant="outline"
           size={compact ? "sm" : "default"}
-          onClick={handleSignOut}
+          onClick={() => void handleSignOut()}
           className="border-border bg-transparent text-foreground hover:bg-white/10"
         >
           Sign out
@@ -98,14 +75,36 @@ export function AuthMenu({ compact = false }: AuthMenuProps) {
     );
   }
 
+  if (compact) {
+    return (
+      <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="border-border bg-transparent text-foreground hover:bg-white/10"
+      >
+        <Link href={loginPath()}>Sign in</Link>
+      </Button>
+    );
+  }
+
   return (
-    <Button
-      asChild
-      variant="outline"
-      size={compact ? "sm" : "default"}
-      className="border-border bg-transparent text-foreground hover:bg-white/10"
-    >
-      <Link href="/login">Sign in</Link>
-    </Button>
+    <div className="flex items-center gap-2">
+      <Button
+        asChild
+        variant="ghost"
+        size="sm"
+        className="text-foreground/80 hover:text-foreground"
+      >
+        <Link href={loginPath()}>Sign in</Link>
+      </Button>
+      <Button
+        asChild
+        variant="brand"
+        size="sm"
+      >
+        <Link href={signUpPath()}>Create account</Link>
+      </Button>
+    </div>
   );
 }

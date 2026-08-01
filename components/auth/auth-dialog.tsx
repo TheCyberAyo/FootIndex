@@ -6,21 +6,29 @@ import { useEffect } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import { GlassCard } from "@/components/shared/glass-card";
 import { Button } from "@/components/ui/button";
+import {
+  getAuthDialogCopy,
+  type AuthIntent,
+} from "@/lib/auth/copy";
 
 interface AuthDialogProps {
   open: boolean;
   onClose: () => void;
   nextPath?: string;
+  intent?: AuthIntent;
 }
 
 /**
- * Lightweight auth modal — magic link + Google before voting.
+ * Lightweight auth modal — magic link + Google before gated actions.
  */
 export function AuthDialog({
   open,
   onClose,
-  nextPath = "/compare#vote",
+  nextPath = "/favorites",
+  intent = "default",
 }: AuthDialogProps) {
+  const copy = getAuthDialogCopy(intent);
+
   useEffect(() => {
     if (!open) {
       return;
@@ -61,16 +69,16 @@ export function AuthDialog({
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>
               <p className="text-xs tracking-[0.18em] text-brand uppercase">
-                Sign in
+                {copy.eyebrow}
               </p>
               <h2
                 id="auth-dialog-title"
                 className="mt-1 font-display text-2xl font-bold text-foreground"
               >
-                Vote as yourself
+                {copy.title}
               </h2>
-              <p className="mt-1 text-sm text-foreground/55">
-                One vote per account. You can change it later.
+              <p className="mt-1 text-sm text-muted-foreground">
+                {copy.description}
               </p>
             </div>
             <Button

@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePlayerSearch } from "@/hooks/use-player-search";
 import { replaceComparePlayerPath } from "@/lib/compare/paths";
+import { isComparePickerEligible } from "@/lib/compare/readiness";
 import { recordSearchClick } from "@/lib/search/session";
 import type { PlayerSearchResult } from "@/types/domain";
 
@@ -51,12 +52,14 @@ function ComparePlayerSlot({
   const containerRef = useRef<HTMLDivElement>(null);
   const { query, setQuery, results, loading, error, reset } = usePlayerSearch({
     limit: 15,
+    compareEligible: true,
   });
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
   const filteredResults = results.filter(
-    (result) => result.slug !== excludeSlug,
+    (result) =>
+      result.slug !== excludeSlug && isComparePickerEligible(result.slug),
   );
 
   const close = useCallback(() => {
@@ -185,8 +188,10 @@ function ComparePlayerSlot({
               onPick={pickResult}
               emptyMessage={
                 results.length > 0 && filteredResults.length === 0
-                  ? `${label} is already the other player in this comparison.`
-                  : `No players found for “${query.trim()}”.`
+                  ? query.trim().length >= 2
+                    ? `Only marquee players with verified compare data appear here. Try Haaland, Mbappé, Messi, or Salah.`
+                    : `${label} is already the other player in this comparison.`
+                  : `No marquee players found for “${query.trim()}”.`
               }
             />
           )}
@@ -245,11 +250,11 @@ export function ComparePlayerPicker({
               Change comparison
             </p>
             <h2 className="mt-1 font-display text-h3 text-foreground">
-              Pick any two players
+              Pick two verified players
             </h2>
             <p className="mt-1 text-body-sm text-muted-foreground">
-              Search to replace either side. FootIndex opens with a featured
-              compare — every pair gets its own shareable URL.
+              Search is limited to our marquee catalog until multi-season sync
+              is complete. Haaland vs Mbappé is fully verified today.
             </p>
           </div>
           <UserRoundPen

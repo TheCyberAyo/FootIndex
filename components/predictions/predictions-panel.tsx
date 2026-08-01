@@ -113,6 +113,7 @@ export function PredictionsPanel({
         open={authOpen}
         onClose={() => setAuthOpen(false)}
         nextPath={nextPath}
+        intent="predict"
       />
     </>
   );

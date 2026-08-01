@@ -154,6 +154,12 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(env.supabaseUrl && env.supabaseAnonKey);
 }
 
+/** Set NEXT_PUBLIC_AUTH_GOOGLE_ENABLED=true after enabling Google in Supabase. */
+export function isGoogleAuthEnabled(): boolean {
+  const value = process.env.NEXT_PUBLIC_AUTH_GOOGLE_ENABLED?.trim().toLowerCase();
+  return value === "true" || value === "1";
+}
+
 export function isSupabaseAdminConfigured(): boolean {
   const env = getServerEnv();
   return Boolean(

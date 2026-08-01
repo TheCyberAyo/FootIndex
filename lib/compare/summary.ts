@@ -32,27 +32,39 @@ export function buildComparisonSummary(
     );
   }
 
-  const goalsOne = playerOne.career?.goals ?? 0;
-  const goalsTwo = playerTwo.career?.goals ?? 0;
-  if (goalsOne > 0 || goalsTwo > 0) {
+  const goalsOne = playerOne.career?.goals ?? null;
+  const goalsTwo = playerTwo.career?.goals ?? null;
+  if (goalsOne != null || goalsTwo != null) {
     parts.push(
-      `Career goals: ${nameOne} ${goalsOne}, ${nameTwo} ${goalsTwo}.`,
+      `Career goals: ${nameOne} ${goalsOne ?? "—"}, ${nameTwo} ${goalsTwo ?? "—"}.`,
     );
   }
 
-  const uclOne = playerOne.career?.champions_league_goals ?? 0;
-  const uclTwo = playerTwo.career?.champions_league_goals ?? 0;
-  if (uclOne > 0 || uclTwo > 0) {
+  const uclOne = playerOne.career?.champions_league_goals ?? null;
+  const uclTwo = playerTwo.career?.champions_league_goals ?? null;
+  if (uclOne != null || uclTwo != null) {
     parts.push(
-      `Champions League goals: ${nameOne} ${uclOne}, ${nameTwo} ${uclTwo}.`,
+      `Champions League goals: ${nameOne} ${uclOne ?? "—"}, ${nameTwo} ${uclTwo ?? "—"}.`,
     );
   }
 
-  const trophiesOne = playerOne.career?.trophies_count ?? playerOne.trophies.length;
-  const trophiesTwo = playerTwo.career?.trophies_count ?? playerTwo.trophies.length;
-  if (trophiesOne > 0 || trophiesTwo > 0) {
+  const trophiesOne =
+    playerOne.career != null
+      ? Math.max(
+          playerOne.career.trophies_count,
+          playerOne.trophies.length,
+        )
+      : null;
+  const trophiesTwo =
+    playerTwo.career != null
+      ? Math.max(
+          playerTwo.career.trophies_count,
+          playerTwo.trophies.length,
+        )
+      : null;
+  if (trophiesOne != null || trophiesTwo != null) {
     parts.push(
-      `Trophy count: ${nameOne} ${trophiesOne}, ${nameTwo} ${trophiesTwo}.`,
+      `Trophy count: ${nameOne} ${trophiesOne ?? "—"}, ${nameTwo} ${trophiesTwo ?? "—"}.`,
     );
   }
 

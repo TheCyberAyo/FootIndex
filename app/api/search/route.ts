@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { isComparePickerEligible } from "@/lib/compare/readiness";
 import {
   checkRateLimit,
   getClientIp,
@@ -21,6 +22,7 @@ const querySchema = z.object({
   competition: z.string().optional(),
   ageMin: z.coerce.number().int().min(15).max(45).optional(),
   ageMax: z.coerce.number().int().min(15).max(45).optional(),
+  compareEligible: z.enum(["1", "true"]).optional(),
 });
 
 /**
@@ -59,6 +61,7 @@ export async function GET(request: Request) {
       competition: searchParams.get("competition") ?? undefined,
       ageMin: searchParams.get("ageMin") ?? undefined,
       ageMax: searchParams.get("ageMax") ?? undefined,
+      compareEligible: searchParams.get("compareEligible") ?? undefined,
     });
 
     if (!parsed.success) {
@@ -69,11 +72,15 @@ export async function GET(request: Request) {
     }
 
     const filters = parseSearchFilters(parsed.data);
-    const results = await searchPlayers(
+    let results = await searchPlayers(
       parsed.data.q,
       parsed.data.limit,
       filters,
     );
+
+    if (parsed.data.compareEligible) {
+      results = results.filter((result) => isComparePickerEligible(result.slug));
+    }
 
     return NextResponse.json(
       {

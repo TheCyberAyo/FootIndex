@@ -14,7 +14,7 @@ import {
   buildRadarSeries,
   buildSeasonProgression,
 } from "@/lib/charts";
-import { buildComparison } from "@/lib/compare";
+import { buildComparison, isComparePairReady } from "@/lib/compare";
 import type { PlayerProfile } from "@/types/domain";
 
 interface PlayerChartsSectionProps {
@@ -31,7 +31,7 @@ export function PlayerChartsSection({
 }: PlayerChartsSectionProps) {
   const pie = buildGoalsPie(profile.career);
   const progression = buildSeasonProgression(profile.seasons);
-  const hasRival = rival != null;
+  const hasRival = rival != null && isComparePairReady(profile, rival);
   const comparison =
     hasRival && rival ? buildComparison(profile, rival) : null;
   const radar = comparison ? buildRadarSeries(comparison.metrics) : null;

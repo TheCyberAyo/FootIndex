@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { Section } from "@/components/shared/section";
 import { compareCanonicalPath } from "@/lib/compare/paths";
+import { isComparePickerEligible, isCompareReady } from "@/lib/compare/readiness";
 import { playerPath } from "@/lib/players/paths";
 import { getPlayerProfileBySlug, listPlayers } from "@/services";
 
@@ -26,6 +27,7 @@ export async function RelatedPlayers({
     return null;
   }
 
+  const currentReady = isCompareReady(profile);
   const currentTeamId = profile.player.current_team_id;
   const competitions = new Set(profile.seasons.map((row) => row.competition));
 
@@ -86,12 +88,14 @@ export async function RelatedPlayers({
                 {competitions.size > 0 ? "" : ""}
               </p>
             ) : null}
-            <Link
-              href={compareCanonicalPath(currentSlug, player.slug)}
-              className="mt-3 inline-block text-sm text-brand hover:underline"
-            >
-              Compare stats →
-            </Link>
+            {currentReady && isComparePickerEligible(player.slug) ? (
+              <Link
+                href={compareCanonicalPath(currentSlug, player.slug)}
+                className="mt-3 inline-block text-sm text-brand hover:underline"
+              >
+                Compare stats →
+              </Link>
+            ) : null}
           </li>
         ))}
       </ul>

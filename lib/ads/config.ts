@@ -34,6 +34,7 @@ export function getAdSlotId(key: AdSlotKey): string | undefined {
 export const AD_EXCLUDED_PATH_PREFIXES = [
   "/admin",
   "/login",
+  "/sign-up",
   "/auth/",
   "/api-docs",
 ] as const;

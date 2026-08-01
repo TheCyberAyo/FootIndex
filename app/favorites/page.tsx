@@ -38,7 +38,7 @@ export default async function FavoritesPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login?next=/favorites");
+    redirect("/sign-up?next=/favorites");
   }
 
   const favorites = await listUserFavorites(user.id);

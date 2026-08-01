@@ -39,3 +39,16 @@ export {
 } from "@/lib/compare/season-compare";
 
 export { buildComparisonSummary } from "@/lib/compare/summary";
+
+export {
+  COMPARE_MIN_SYNCED_SEASONS,
+  assessComparePair,
+  countDistinctSeasons,
+  describeCompareDataTier,
+  getCompareDataTier,
+  isComparePairReady,
+  isComparePickerEligible,
+  isCompareReady,
+  type CompareDataTier,
+  type ComparePairReadiness,
+} from "@/lib/compare/readiness";

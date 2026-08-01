@@ -248,6 +248,7 @@ export function CompareVotePanel({
           setPendingChoiceSlug(null);
         }}
         nextPath={nextPath}
+        intent="vote"
       />
     </>
   );

@@ -2,6 +2,10 @@ import { localPlayers } from "@/lib/data/local-seed";
 import { isSupabaseConfigured } from "@/lib/env";
 import { getPlayerAge, formatPosition } from "@/lib/players/format";
 import { compareCanonicalPath } from "@/lib/compare/paths";
+import {
+  isComparePickerEligible,
+  isCompareReady,
+} from "@/lib/compare/readiness";
 import { playerPath } from "@/lib/players/paths";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import { assertNoError } from "@/services/errors";
@@ -25,7 +29,7 @@ export interface SimilarPlayerResult {
   score: number;
   matchReasons: string[];
   href: string;
-  compareHref: string;
+  compareHref: string | null;
 }
 
 interface CandidateRow {
@@ -226,6 +230,8 @@ export async function listSimilarPlayers(
     return [];
   }
 
+  const canOfferCompare = isCompareReady(profile);
+
   const latestSeason = profile.seasons[0];
   const source = {
     position: profile.player.position,
@@ -278,7 +284,10 @@ export async function listSimilarPlayers(
         score: 0,
         matchReasons: buildMatchReasons(source, candidate),
         href: playerPath(candidate.slug),
-        compareHref: compareCanonicalPath(slug, candidate.slug),
+        compareHref:
+          canOfferCompare && isComparePickerEligible(candidate.slug)
+            ? compareCanonicalPath(slug, candidate.slug)
+            : null,
       }));
   }
 
@@ -299,6 +308,9 @@ export async function listSimilarPlayers(
     score,
     matchReasons: buildMatchReasons(source, candidate),
     href: playerPath(candidate.slug),
-    compareHref: compareCanonicalPath(slug, candidate.slug),
+    compareHref:
+      canOfferCompare && isComparePickerEligible(candidate.slug)
+        ? compareCanonicalPath(slug, candidate.slug)
+        : null,
   }));
 }

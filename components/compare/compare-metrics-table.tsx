@@ -75,9 +75,12 @@ export function CompareMetricsTable({
                     <p className="text-[11px] leading-tight font-medium tracking-wide text-muted-foreground uppercase sm:text-xs">
                       {metric.label}
                     </p>
-                    {metric.winner === "tie" ? (
+                    {metric.winner === "tie" || metric.delta == null ? (
                       <p className="mt-0.5 text-[10px] text-muted-foreground/70">
-                        Tied
+                        {metric.playerOneValue == null ||
+                        metric.playerTwoValue == null
+                          ? "Unavailable"
+                          : "Tied"}
                       </p>
                     ) : (
                       <p className="mt-0.5 text-[10px] text-brand/80">

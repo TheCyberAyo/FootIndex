@@ -2,7 +2,7 @@
  * Client-safe auth redirect helpers (no next/headers).
  */
 
-export function authRedirectUrl(nextPath = "/compare#vote"): string {
+export function authRedirectUrl(nextPath = "/favorites"): string {
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
     "http://localhost:3000";
