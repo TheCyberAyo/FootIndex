@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 
 import { CommentsSection } from "@/components/comments/comments-section";
+import { AdPlacement } from "@/components/ads/ad-placement";
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/shared/page-header";
 import { Section } from "@/components/shared/section";
@@ -76,6 +77,9 @@ export default async function NewsArticlePage({
             <p key={paragraph.slice(0, 24)}>{paragraph}</p>
           ))}
         </article>
+      </Section>
+      <Section containerClassName="py-6 sm:py-8">
+        <AdPlacement slotKey="news" format="rectangle" minHeight={250} />
       </Section>
       <CommentsSection
         entityType="news"

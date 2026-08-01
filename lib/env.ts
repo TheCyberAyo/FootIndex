@@ -31,12 +31,29 @@ const optionalNonEmptyString = z.preprocess(
   z.string().min(1).optional(),
 );
 
+const adsenseClientId = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+  z
+    .string()
+    .regex(/^ca-pub-\d+$/, "Must be a valid AdSense client ID (ca-pub-…)")
+    .optional(),
+);
+
 const publicEnvSchema = z.object({
   NEXT_PUBLIC_SITE_URL: optionalUrl,
   NEXT_PUBLIC_SUPABASE_URL: optionalUrl,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalNonEmptyString,
   NEXT_PUBLIC_GA_MEASUREMENT_ID: optionalNonEmptyString,
+  NEXT_PUBLIC_ADSENSE_CLIENT_ID: adsenseClientId,
 });
+
+const adsensePublisherId = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+  z
+    .string()
+    .regex(/^pub-\d+$/, "Must be a valid AdSense publisher ID (pub-…)")
+    .optional(),
+);
 
 const serverEnvSchema = publicEnvSchema.extend({
   SUPABASE_SERVICE_ROLE_KEY: optionalNonEmptyString,
@@ -45,6 +62,7 @@ const serverEnvSchema = publicEnvSchema.extend({
   CRON_SECRET: optionalNonEmptyString,
   OPENAI_API_KEY: optionalNonEmptyString,
   GOOGLE_SITE_VERIFICATION: optionalNonEmptyString,
+  ADSENSE_PUBLISHER_ID: adsensePublisherId,
 });
 
 export interface PublicEnv {
@@ -52,6 +70,7 @@ export interface PublicEnv {
   supabaseUrl: string | undefined;
   supabaseAnonKey: string | undefined;
   gaMeasurementId: string | undefined;
+  adsenseClientId: string | undefined;
 }
 
 export interface ServerEnv extends PublicEnv {
@@ -61,6 +80,7 @@ export interface ServerEnv extends PublicEnv {
   cronSecret: string | undefined;
   openAiApiKey: string | undefined;
   googleSiteVerification: string | undefined;
+  adsensePublisherId: string | undefined;
 }
 
 function readPublicEnv(): PublicEnv {
@@ -69,6 +89,7 @@ function readPublicEnv(): PublicEnv {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+    NEXT_PUBLIC_ADSENSE_CLIENT_ID: process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID,
   });
 
   if (!parsed.success) {
@@ -80,6 +101,7 @@ function readPublicEnv(): PublicEnv {
     supabaseUrl: parsed.data.NEXT_PUBLIC_SUPABASE_URL,
     supabaseAnonKey: parsed.data.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     gaMeasurementId: parsed.data.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+    adsenseClientId: parsed.data.NEXT_PUBLIC_ADSENSE_CLIENT_ID,
   };
 }
 
@@ -93,12 +115,14 @@ export function getServerEnv(): ServerEnv {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+    NEXT_PUBLIC_ADSENSE_CLIENT_ID: process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     API_FOOTBALL_KEY: process.env.API_FOOTBALL_KEY,
     API_FOOTBALL_BASE_URL: process.env.API_FOOTBALL_BASE_URL,
     CRON_SECRET: process.env.CRON_SECRET,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     GOOGLE_SITE_VERIFICATION: process.env.GOOGLE_SITE_VERIFICATION,
+    ADSENSE_PUBLISHER_ID: process.env.ADSENSE_PUBLISHER_ID,
   });
 
   if (!parsed.success) {
@@ -117,7 +141,12 @@ export function getServerEnv(): ServerEnv {
     cronSecret: parsed.data.CRON_SECRET,
     openAiApiKey: parsed.data.OPENAI_API_KEY,
     googleSiteVerification: parsed.data.GOOGLE_SITE_VERIFICATION,
+    adsensePublisherId: parsed.data.ADSENSE_PUBLISHER_ID,
   };
+}
+
+export function isAdsenseConfigured(): boolean {
+  return Boolean(getPublicEnv().adsenseClientId);
 }
 
 export function isSupabaseConfigured(): boolean {

@@ -17,7 +17,7 @@ export const metadata = createPageMetadata({
   path: "/privacy",
 });
 
-const UPDATED = "25 July 2026";
+const UPDATED = "31 July 2026";
 
 export default function PrivacyPage() {
   return (
@@ -47,10 +47,9 @@ export default function PrivacyPage() {
         <div className="grid gap-4">
           <ProseSection title="Who we are">
             <p>
-              {SITE_NAME} is an independent football statistics site comparing
-              {SITE_NAME} compares football players using public statistics. We are not affiliated with FIFA,
-              UEFA, Premier League, La Liga, Manchester City, Real Madrid, or
-              either player.
+              {SITE_NAME} is an independent football statistics site. We compare
+              football players using public statistics and are not affiliated
+              with FIFA, UEFA, national leagues, clubs, or individual players.
             </p>
           </ProseSection>
 
@@ -86,15 +85,47 @@ export default function PrivacyPage() {
           <ProseSection title="Processors">
             <p>
               We use Supabase (authentication and PostgreSQL), Vercel (hosting),
-              and API-Football (match/season sync on the server). Their
-              processing is limited to providing those services.
+              API-Football (match/season sync on the server), Google Analytics
+              (optional usage analytics), and Google AdSense (advertising when
+              enabled). Their processing is limited to providing those services.
+            </p>
+          </ProseSection>
+
+          <ProseSection title="Advertising">
+            <p>
+              When AdSense is enabled, Google may set cookies and use similar
+              technologies to serve and measure ads. Ads may be personalized
+              based on your consent choice. You can manage ad personalization
+              in{" "}
+              <a
+                href="https://adssettings.google.com"
+                className="text-brand hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Google Ad Settings
+              </a>{" "}
+              or opt out of interest-based ads via the{" "}
+              <a
+                href="https://optout.aboutads.info"
+                className="text-brand hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Digital Advertising Alliance
+              </a>
+              .
             </p>
           </ProseSection>
 
           <ProseSection title="Cookies">
             <p>
-              Essential cookies/storage support Supabase Auth sessions and theme
-              preference. We do not run third-party advertising trackers on v1.
+              Essential cookies/storage support Supabase Auth sessions, theme
+              preference, search sessions, and first-party analytics. With your
+              consent, we also allow advertising and analytics cookies from
+              Google (AdSense and Google Analytics). You can change your choice
+              anytime by clearing site data or using the cookie banner when it
+              appears.
             </p>
           </ProseSection>
 

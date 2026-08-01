@@ -23,7 +23,7 @@ interface RootLayoutProps {
  * Decision: default dark via next-themes; light is optional (Phase 7).
  */
 export default function RootLayout({ children }: RootLayoutProps) {
-  const { gaMeasurementId } = getPublicEnv();
+  const { gaMeasurementId, adsenseClientId } = getPublicEnv();
 
   return (
     <html
@@ -31,12 +31,38 @@ export default function RootLayout({ children }: RootLayoutProps) {
       className={`${fontDisplay.variable} ${fontBody.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        {adsenseClientId ? (
+          <>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('consent', 'default', {
+                    ad_storage: 'denied',
+                    ad_user_data: 'denied',
+                    ad_personalization: 'denied',
+                    analytics_storage: 'denied',
+                    wait_for_update: 500
+                  });
+                `,
+              }}
+            />
+            <script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
+              crossOrigin="anonymous"
+            />
+          </>
+        ) : null}
+      </head>
       <body className="min-h-dvh bg-background font-body text-foreground antialiased">
         {gaMeasurementId ? (
           <GoogleAnalytics measurementId={gaMeasurementId} />
         ) : null}
         <JsonLd data={createWebSiteJsonLd()} />
-        <AppProviders>
+        <AppProviders adsenseEnabled={Boolean(adsenseClientId)}>
           <SiteShell>{children}</SiteShell>
         </AppProviders>
       </body>

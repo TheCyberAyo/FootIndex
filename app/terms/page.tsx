@@ -17,7 +17,7 @@ export const metadata = createPageMetadata({
   path: "/terms",
 });
 
-const UPDATED = "25 July 2026";
+const UPDATED = "31 July 2026";
 
 export default function TermsPage() {
   return (
@@ -48,8 +48,8 @@ export default function TermsPage() {
           <ProseSection title="The service">
             <p>
               {SITE_NAME} provides football statistics and community features
-              comparing Erling Haaland and Kylian Mbappé (career, club, country,
-              season views, votes, predictions, and comments). The site is for
+              for players across our database — career stats, comparisons,
+              rankings, votes, predictions, and comments. The site is for
               informational and entertainment use.
             </p>
           </ProseSection>
@@ -96,6 +96,14 @@ export default function TermsPage() {
               Player names, images, and competition marks belong to their
               respective owners. Third-party data providers retain rights in
               their feeds.
+            </p>
+          </ProseSection>
+
+          <ProseSection title="Advertising">
+            <p>
+              The site may display third-party advertisements through Google
+              AdSense. We do not endorse products or services shown in ads.
+              Advertisers are solely responsible for their content.
             </p>
           </ProseSection>
 

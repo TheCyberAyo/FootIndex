@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { FeaturedRivalrySection } from "@/components/home/featured-rivalry-section";
+import { AdPlacement } from "@/components/ads/ad-placement";
 import { HomeHero } from "@/components/home/home-hero";
 import { LiveScoresSectionClient } from "@/components/home/live-scores-section-client";
 import { TrendingPlayersGrid } from "@/components/home/trending-players-grid";
@@ -82,6 +83,10 @@ export default async function HomePage() {
         ]}
       />
       <HomeHero trending={trending} />
+
+      <Section containerClassName="py-6 sm:py-8">
+        <AdPlacement slotKey="home" format="horizontal" minHeight={90} />
+      </Section>
 
       <Section
         eyebrow="Discover"

@@ -1,4 +1,5 @@
 import { PlayerProfileView } from "@/components/players/player-profile-view";
+import { AdPlacement } from "@/components/ads/ad-placement";
 import { PlayerViewTracker } from "@/components/players/player-view-tracker";
 import { RecentlyViewedPlayers } from "@/components/players/recently-viewed-players";
 import { RelatedPlayers } from "@/components/players/related-players";
@@ -55,6 +56,9 @@ export async function PlayerRoutePage({ slug }: PlayerRoutePageProps) {
       <Breadcrumbs items={breadcrumbItems} />
       <PlayerViewTracker playerId={profile.player.id} />
       <PlayerProfileView profile={profile} rival={rival} />
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <AdPlacement slotKey="player" format="horizontal" minHeight={90} />
+      </div>
       <RecentlyViewedPlayers excludeSlug={slug} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" />
       <SimilarPlayers currentSlug={slug} />
       <RelatedPlayers currentSlug={slug} />

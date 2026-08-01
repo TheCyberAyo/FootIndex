@@ -1,4 +1,5 @@
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
+import { AdPlacement } from "@/components/ads/ad-placement";
 import { JsonLd } from "@/components/seo/json-ld";
 import { RankingsCategoryGrid } from "@/components/rankings/rankings-category-grid";
 import { RankingTable } from "@/components/rankings/ranking-table";
@@ -54,6 +55,10 @@ export default async function RankingsPage() {
         description="Current career goals leaders in our database."
       >
         <RankingTable entries={preview} metricLabel="Goals" />
+      </Section>
+
+      <Section containerClassName="py-6 sm:py-8">
+        <AdPlacement slotKey="rankings" format="horizontal" minHeight={90} />
       </Section>
 
       <Section

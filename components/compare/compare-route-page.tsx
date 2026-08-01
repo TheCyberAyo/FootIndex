@@ -1,4 +1,5 @@
 import { CompareBoard } from "@/components/compare/compare-board";
+import { AdPlacement } from "@/components/ads/ad-placement";
 import { ComparisonViewTracker } from "@/components/compare/comparison-view-tracker";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -77,6 +78,9 @@ export async function CompareRoutePage({
         initialSeason={initialSeason}
         initialYear={initialYear}
       />
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <AdPlacement slotKey="compare" format="horizontal" minHeight={90} />
+      </div>
     </>
   );
 }
